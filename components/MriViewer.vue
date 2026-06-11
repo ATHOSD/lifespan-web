@@ -1,6 +1,9 @@
 <template>
   <div class="viewer-container">
     <canvas ref="canvas" />
+    <div v-if="hoverLabel !== null" class="label-badge">
+      Label {{ hoverLabel }}
+    </div>
   </div>
 </template>
 
@@ -17,6 +20,7 @@ const emit = defineEmits<{
 }>()
 
 const canvas = ref<HTMLCanvasElement | null>(null)
+const hoverLabel = ref<number | null>(null)
 let nv: any = null
 
 onMounted(async () => {
@@ -27,6 +31,7 @@ onMounted(async () => {
     show3Dcrosshair: true,
     backColor: [0.05, 0.05, 0.05, 1],
     crosshairColor: [1, 0, 0, 1],
+    onLocationChange: handleLocation,
   })
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)
@@ -37,6 +42,15 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => { nv = null })
+
+function handleLocation(data: any) {
+  if (!data?.values || data.values.length < 2) {
+    hoverLabel.value = null
+    return
+  }
+  const val = Math.round(data.values[1]?.value ?? 0)
+  hoverLabel.value = val > 0 ? val : null
+}
 
 async function loadVolumes(mriUrl: string, segUrl: string) {
   if (!nv) return
@@ -51,7 +65,7 @@ function computeVolumes() {
   if (!nv || nv.volumes.length < 2) return
   const seg = nv.volumes[1]
   const img = seg.img as Float32Array
-  const dims = seg.hdr.pixDims            // [1, dx, dy, dz, ...]
+  const dims = seg.hdr.pixDims
   const voxelMm3 = dims[1] * dims[2] * dims[3]
 
   const counts: Record<number, number> = {}
@@ -74,6 +88,7 @@ watch(() => [props.mriUrl, props.segUrl], async ([mri, seg]) => {
 
 <style scoped>
 .viewer-container {
+  position: relative;
   width: 100%;
   height: 600px;
   background: #1a1a1a;
@@ -81,4 +96,16 @@ watch(() => [props.mriUrl, props.segUrl], async ([mri, seg]) => {
   overflow: hidden;
 }
 canvas { width: 100%; height: 100%; }
+
+.label-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: #fff;
+  font-size: 0.95rem;
+  padding: 4px 12px;
+  border-radius: 6px;
+  pointer-events: none;
+}
 </style>
