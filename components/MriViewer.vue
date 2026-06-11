@@ -25,11 +25,13 @@ onMounted(async () => {
 
   nv = new Niivue({
     show3Dcrosshair: true,
-    backColor: [0.1, 0.1, 0.1, 1],
+    backColor: [0.05, 0.05, 0.05, 1],
     crosshairColor: [1, 0, 0, 1],
+    multiplanarShowRender: false,
   })
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)
+  nv.opts.multiplanarLayout = 2
 
   if (props.mriUrl && props.segUrl) {
     await loadVolumes(props.mriUrl, props.segUrl)
@@ -41,8 +43,8 @@ onBeforeUnmount(() => { nv = null })
 async function loadVolumes(mriUrl: string, segUrl: string) {
   if (!nv) return
   await nv.loadVolumes([
-    { url: mriUrl, name: 'scan.nii.gz', cal_min: 0, cal_max: 1 },
-    { url: segUrl, name: 'seg.nii.gz', opacity: 0.6, colormap: 'random256', cal_min: 1, cal_max: 14 },
+    { url: mriUrl, name: 'scan.nii.gz', colormap: 'gray' },
+    { url: segUrl, name: 'seg.nii.gz', opacity: 0.7, colormap: 'random256', cal_min: 0, cal_max: 14 },
   ])
   computeVolumes()
 }

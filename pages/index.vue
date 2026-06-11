@@ -71,7 +71,11 @@ function onVolumes(data: { label: number; volume: number }[]) {
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement
   file.value = input.files?.[0] || null
-  if (file.value) mriUrl.value = URL.createObjectURL(file.value)
+  if (file.value) {
+    mriUrl.value = URL.createObjectURL(file.value)
+    segUrl.value = null
+    volumes.value = []
+  }
 }
 
 async function runSegmentation() {
