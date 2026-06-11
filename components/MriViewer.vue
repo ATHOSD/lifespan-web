@@ -36,7 +36,10 @@ onMounted(async () => {
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)
 
-  // Allow page scrolling when wheeling over the canvas (NiiVue normally captures all wheel events)
+  // Register vivid 14-label colormap (FreeSurfer/ITK-SNAP style)
+  nv.addColormap('seg14', buildSeg14Lut())
+
+  // Allow page scrolling when wheeling over the canvas
   canvas.value.addEventListener('wheel', (e: WheelEvent) => {
     window.scrollBy({ top: e.deltaY, behavior: 'instant' })
   }, { passive: true })
@@ -57,11 +60,44 @@ function handleLocation(data: any) {
   hoverLabel.value = val > 0 ? val : null
 }
 
+// Build a 256-entry LUT where each of the 14 label bands gets a vivid distinct color
+function buildSeg14Lut() {
+  const COLORS = [
+    [205,  62,  78], // 1  dark red
+    [120,  18, 134], // 2  purple
+    [196,  58, 250], // 3  violet
+    [230, 148,  34], // 4  orange
+    [  0, 118,  14], // 5  dark green
+    [122, 186, 220], // 6  sky blue
+    [236,  13, 176], // 7  magenta
+    [ 12,  48, 255], // 8  blue
+    [220, 216,  20], // 9  yellow
+    [ 42, 204, 164], // 10 teal
+    [255, 128,   0], // 11 amber
+    [103, 255, 255], // 12 cyan
+    [119, 159, 176], // 13 steel blue
+    [255, 200, 200], // 14 light pink
+  ]
+  const R = new Array(256).fill(0)
+  const G = new Array(256).fill(0)
+  const B = new Array(256).fill(0)
+  const A = new Array(256).fill(0)
+  for (let lbl = 1; lbl <= 14; lbl++) {
+    const [r, g, b] = COLORS[lbl - 1]
+    const lo = Math.round((lbl - 0.5) / 14 * 255)
+    const hi = Math.round((lbl + 0.5) / 14 * 255)
+    for (let p = Math.max(1, lo); p <= Math.min(255, hi); p++) {
+      R[p] = r; G[p] = g; B[p] = b; A[p] = 255
+    }
+  }
+  return { R, G, B, A }
+}
+
 async function loadVolumes(mriUrl: string, segUrl: string) {
   if (!nv) return
   await nv.loadVolumes([
     { url: mriUrl, name: 'scan.nii.gz', colormap: 'gray' },
-    { url: segUrl, name: 'seg.nii.gz', opacity: 0.7, colormap: 'random256', cal_min: 0, cal_max: 14 },
+    { url: segUrl, name: 'seg.nii.gz', opacity: 0.7, colormap: 'seg14', cal_min: 0, cal_max: 14 },
   ])
   computeVolumes()
 }
