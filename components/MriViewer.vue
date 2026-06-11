@@ -27,11 +27,9 @@ onMounted(async () => {
     show3Dcrosshair: true,
     backColor: [0.05, 0.05, 0.05, 1],
     crosshairColor: [1, 0, 0, 1],
-    multiplanarShowRender: false,
   })
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)
-  nv.opts.multiplanarLayout = 2
 
   if (props.mriUrl && props.segUrl) {
     await loadVolumes(props.mriUrl, props.segUrl)
@@ -55,13 +53,13 @@ async function loadVolumes(mriUrl: string, segUrl: string) {
     { url: mriUrl, name: 'scan.nii.gz', colormap: 'gray' },
     { url: segUrl, name: 'seg.nii.gz', opacity: 0.7, colormap: 'random256', cal_min: 0, cal_max: 14 },
   ])
-  // Apply vivid discrete label colormap
+  computeVolumes()
+  // Apply vivid discrete label colormap after computing volumes
   const seg = nv.volumes[1]
   if (seg) {
     seg.colormapLabel = LABEL_LUT
     nv.updateGLVolume()
   }
-  computeVolumes()
 }
 
 function computeVolumes() {
