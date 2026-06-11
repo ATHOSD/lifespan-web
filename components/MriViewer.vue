@@ -38,15 +38,6 @@ onMounted(async () => {
 
 onBeforeUnmount(() => { nv = null })
 
-// Vivid distinct colors for labels 1-14, inspired by FreeSurfer/ITK-SNAP LUT
-const LABEL_LUT = {
-  R: [0,   205, 120, 196, 220, 230,   0, 122, 236,  12, 204,  42, 119, 220, 103],
-  G: [0,    62,  18,  58, 248, 148, 118, 186,  13,  48, 182, 204, 159, 216, 255],
-  B: [0,    78, 134, 250, 164,  34,  14, 220, 176, 255, 142, 164, 176,  20, 255],
-  A: [0,   255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255],
-  I: [0,     1,   2,   3,   4,   5,   6,   7,   8,   9,  10,  11,  12,  13,  14],
-}
-
 async function loadVolumes(mriUrl: string, segUrl: string) {
   if (!nv) return
   await nv.loadVolumes([
@@ -54,12 +45,6 @@ async function loadVolumes(mriUrl: string, segUrl: string) {
     { url: segUrl, name: 'seg.nii.gz', opacity: 0.7, colormap: 'random256', cal_min: 0, cal_max: 14 },
   ])
   computeVolumes()
-  // Apply vivid discrete label colormap after computing volumes
-  const seg = nv.volumes[1]
-  if (seg) {
-    seg.colormapLabel = LABEL_LUT
-    nv.updateGLVolume()
-  }
 }
 
 function computeVolumes() {
