@@ -36,6 +36,11 @@ onMounted(async () => {
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)
 
+  // Allow page scrolling when wheeling over the canvas (NiiVue normally captures all wheel events)
+  canvas.value.addEventListener('wheel', (e: WheelEvent) => {
+    window.scrollBy({ top: e.deltaY, behavior: 'instant' })
+  }, { passive: true })
+
   if (props.mriUrl && props.segUrl) {
     await loadVolumes(props.mriUrl, props.segUrl)
   }
@@ -90,7 +95,7 @@ watch(() => [props.mriUrl, props.segUrl], async ([mri, seg]) => {
 .viewer-container {
   position: relative;
   width: 100%;
-  height: 600px;
+  height: 420px;
   background: #1a1a1a;
   border-radius: 8px;
   overflow: hidden;
