@@ -109,7 +109,7 @@ async function runSegmentation() {
 html { font-size: 18px; }
 body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
 
-.app { max-width: 1400px; margin: 0 auto; padding: 32px; }
+.app { max-width: 1100px; margin: 0 auto; padding: 32px; }
 
 header { margin-bottom: 32px; }
 header h1 { font-size: 2rem; font-weight: 600; }
