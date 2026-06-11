@@ -39,11 +39,6 @@ onMounted(async () => {
   // Register vivid 14-label colormap (FreeSurfer/ITK-SNAP style)
   nv.addColormap('seg14', buildSeg14Lut())
 
-  // Allow page scrolling when wheeling over the canvas
-  canvas.value.addEventListener('wheel', (e: WheelEvent) => {
-    window.scrollBy({ top: e.deltaY, behavior: 'instant' })
-  }, { passive: true })
-
   if (props.mriUrl && props.segUrl) {
     await loadVolumes(props.mriUrl, props.segUrl)
   }
