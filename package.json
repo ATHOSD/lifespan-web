@@ -1,0 +1,13 @@
+{
+  "name": "lifespan-web",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview"
+  },
+  "dependencies": {
+    "nuxt": "^3.13.0",
+    "@niivue/niivue": "^0.46.0"
+  }
+}
