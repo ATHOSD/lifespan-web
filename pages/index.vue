@@ -46,7 +46,8 @@
               <option value="GA">GA</option>
               <option value="Postnatal">Postnatal</option>
             </select>
-            <input type="number" v-model="ageValue" min="0" placeholder="--" class="age-num" />
+            <input type="number" v-model="ageValue" min="0" max="9999" step="1"
+                 placeholder="--" class="age-num" @keydown="blockNonNumeric" @paste.prevent />
             <select v-model="ageUnit" class="age-unit">
               <option value="weeks">weeks</option>
               <option value="months">months</option>
@@ -130,6 +131,11 @@ function onVolumes(data: { label: number; volume: number }[]) {
   volumes.value = data
 }
 
+function blockNonNumeric(e: KeyboardEvent) {
+  if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return
+  if (!/^\d$/.test(e.key)) e.preventDefault()
+}
+
 function onFileChange(e: Event) {
   const input = e.target as HTMLInputElement
   file.value = input.files?.[0] || null
@@ -171,7 +177,7 @@ async function runSegmentation() {
 html { font-size: 18px; }
 body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
 
-.app { max-width: 1100px; margin: 0 auto; padding: 32px; }
+.app { max-width: 1260px; margin: 0 auto; padding: 32px; }
 
 header { margin-bottom: 32px; }
 header h1 { font-size: 2rem; font-weight: 600; }
@@ -211,12 +217,12 @@ input[type="file"], select, input[type="number"] {
   color: #e0e0e0; padding: 12px 16px; font-size: 1rem;
 }
 select { cursor: pointer; }
-input[type="number"] { width: 80px; }
+input[type="number"] { width: 100px; }
 input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 
 .age-row { display: flex; gap: 8px; align-items: center; }
 .age-type { width: 110px; }
-.age-num { width: 80px; padding: 12px 10px; }
+.age-num { width: 100px; padding: 12px 10px; }
 .age-unit { width: 110px; }
 
 button {
