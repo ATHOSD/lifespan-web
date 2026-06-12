@@ -46,7 +46,7 @@
               <option value="GA">GA</option>
               <option value="Postnatal">Postnatal</option>
             </select>
-            <input type="number" v-model="ageValue" min="0" max="9999" step="1"
+            <input type="number" v-model="ageValue" min="0" max="9999" step="any"
                  placeholder="--" class="age-num" @keydown="blockNonNumeric" @paste.prevent />
             <select v-model="ageUnit" class="age-unit">
               <option value="weeks">weeks</option>
@@ -133,6 +133,7 @@ function onVolumes(data: { label: number; volume: number }[]) {
 
 function blockNonNumeric(e: KeyboardEvent) {
   if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) return
+  if (e.key === '.' && !(e.target as HTMLInputElement).value.includes('.')) return
   if (!/^\d$/.test(e.key)) e.preventDefault()
 }
 
