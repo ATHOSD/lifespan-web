@@ -135,7 +135,7 @@ a { text-decoration: none; }
 .brand-name {
   font-size: 2.0rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: -0.01em;
   color: #f1f5f9;
 }
 .brand-accent {
