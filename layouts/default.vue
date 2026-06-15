@@ -4,11 +4,10 @@
     <Transition name="fade">
       <div v-if="showDisclaimer" class="modal-backdrop">
         <div class="modal-box">
-          <div class="modal-glow" />
           <div class="modal-icon">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" stroke="#3b82f6" stroke-width="1.5" stroke-linejoin="round"/>
-              <path d="M9 12l2 2 4-4" stroke="#3b82f6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2L4 6v6c0 5.5 3.4 10.7 8 12 4.6-1.3 8-6.5 8-12V6l-8-4z" stroke="#7c3aed" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M9 12l2 2 4-4" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </div>
           <h2>Data Privacy Notice</h2>
@@ -98,8 +97,8 @@ function acceptDisclaimer() {
 html { font-size: 16px; }
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  background: #06101f;
-  color: #e2e8f0;
+  background: #faf9f6;
+  color: #1c1917;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -112,9 +111,8 @@ a { text-decoration: none; }
 /* ── Navbar ─────────────────────────────── */
 .navbar {
   height: 68px;
-  background: rgba(6, 14, 30, 0.96);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: #ffffff;
+  border-bottom: 1px solid #e8e4dc;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -124,36 +122,35 @@ a { text-decoration: none; }
   z-index: 50;
 }
 
-.brand { display: flex; align-items: center; gap: 10px; }
+.brand { display: flex; align-items: center; gap: 11px; }
 .brand-icon {
   width: 36px; height: 36px;
-  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  background: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
   border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
 }
 .brand-name {
   font-size: 2.0rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: #f1f5f9;
+  color: #1c1917;
 }
 .brand-accent {
-  background: linear-gradient(90deg, #60a5fa, #a78bfa);
+  background: linear-gradient(90deg, #7c3aed, #9333ea);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
-.navbar-right { display: flex; align-items: center; gap: 12px; }
+.navbar-right { display: flex; align-items: center; }
 .version-pill {
   font-size: 0.8rem;
   font-weight: 500;
-  color: #475569;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
+  color: #a8a29e;
+  background: #f5f3ef;
+  border: 1px solid #e8e4dc;
   border-radius: 999px;
   padding: 5px 14px;
-  letter-spacing: 0.04em;
 }
 
 /* ── Body ───────────────────────────────── */
@@ -163,8 +160,8 @@ a { text-decoration: none; }
 .sidebar {
   width: 216px;
   min-width: 216px;
-  background: rgba(6, 12, 26, 0.7);
-  border-right: 1px solid rgba(255,255,255,0.05);
+  background: #f5f3ef;
+  border-right: 1px solid #e8e4dc;
   position: fixed;
   top: 68px; left: 0; bottom: 0;
   display: flex;
@@ -174,7 +171,7 @@ a { text-decoration: none; }
 .sidebar-section {
   font-size: 0.65rem;
   font-weight: 700;
-  color: #334155;
+  color: #a8a29e;
   letter-spacing: 0.12em;
   padding: 0 10px;
   margin-bottom: 6px;
@@ -189,23 +186,20 @@ a { text-decoration: none; }
   border-radius: 9px;
   font-size: 0.925rem;
   font-weight: 500;
-  color: #64748b;
+  color: #78716c;
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
   user-select: none;
 }
-.nav-item:hover { background: rgba(255,255,255,0.04); color: #94a3b8; }
-.nav-item.active {
-  background: rgba(59,130,246,0.1);
-  color: #93c5fd;
-}
+.nav-item:hover { background: #ede9e3; color: #1c1917; }
+.nav-item.active { background: #ede9fe; color: #7c3aed; }
 .nav-item.active::before {
   content: '';
   position: absolute;
   left: 0; top: 25%; bottom: 25%;
   width: 3px;
-  background: linear-gradient(180deg, #3b82f6, #818cf8);
+  background: linear-gradient(180deg, #7c3aed, #9333ea);
   border-radius: 999px;
 }
 .nav-icon { width: 17px; height: 17px; flex-shrink: 0; }
@@ -213,17 +207,16 @@ a { text-decoration: none; }
   margin-left: auto;
   font-size: 0.62rem;
   font-weight: 600;
-  color: #475569;
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.07);
+  color: #a8a29e;
+  background: #ede9e3;
+  border: 1px solid #d6d3cd;
   border-radius: 999px;
   padding: 2px 7px;
-  letter-spacing: 0.04em;
 }
 
 .sidebar-footer { margin-top: auto; padding: 0 6px; }
-.sidebar-divider { height: 1px; background: rgba(255,255,255,0.05); margin-bottom: 12px; }
-.sidebar-ver { font-size: 0.7rem; color: #1e293b; }
+.sidebar-divider { height: 1px; background: #e8e4dc; margin-bottom: 12px; }
+.sidebar-ver { font-size: 0.7rem; color: #c4bfb8; }
 
 /* ── Main ───────────────────────────────── */
 .main { margin-left: 216px; flex: 1; padding: 32px 36px; min-width: 0; }
@@ -231,56 +224,48 @@ a { text-decoration: none; }
 /* ── Disclaimer modal ───────────────────── */
 .modal-backdrop {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.75);
-  backdrop-filter: blur(8px);
+  background: rgba(28, 25, 23, 0.45);
+  backdrop-filter: blur(6px);
   display: flex; align-items: center; justify-content: center;
   z-index: 100;
 }
 .modal-box {
-  position: relative;
-  background: linear-gradient(160deg, #0d1f3c 0%, #0a1628 100%);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #ffffff;
+  border: 1px solid #e8e4dc;
   border-radius: 20px;
   padding: 40px;
   max-width: 460px; width: 90%;
   display: flex; flex-direction: column; gap: 14px;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.1);
-  overflow: hidden;
-}
-.modal-glow {
-  position: absolute; top: -60px; right: -60px;
-  width: 200px; height: 200px;
-  background: radial-gradient(circle, rgba(59,130,246,0.15) 0%, transparent 70%);
-  pointer-events: none;
+  box-shadow: 0 20px 60px rgba(28, 25, 23, 0.12);
 }
 .modal-icon {
   width: 44px; height: 44px;
-  background: rgba(59,130,246,0.1);
-  border: 1px solid rgba(59,130,246,0.2);
+  background: #f3f0ff;
+  border: 1px solid #ddd6fe;
   border-radius: 12px;
   display: flex; align-items: center; justify-content: center;
 }
 .modal-icon svg { width: 22px; height: 22px; }
-.modal-box h2 { font-size: 1.2rem; font-weight: 700; color: #f1f5f9; letter-spacing: -0.02em; }
-.modal-box p { font-size: 0.875rem; color: #94a3b8; line-height: 1.65; }
-.modal-box strong { color: #e2e8f0; font-weight: 600; }
+.modal-box h2 { font-size: 1.2rem; font-weight: 700; color: #1c1917; }
+.modal-box p { font-size: 0.9rem; color: #78716c; line-height: 1.65; }
+.modal-box strong { color: #1c1917; font-weight: 600; }
 .modal-box ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
 .modal-box li {
-  font-size: 0.845rem; color: #94a3b8; line-height: 1.5;
+  font-size: 0.875rem; color: #57534e; line-height: 1.5;
   padding: 8px 12px 8px 32px; position: relative;
-  background: rgba(255,255,255,0.02);
+  background: #faf9f6;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.04);
+  border: 1px solid #e8e4dc;
 }
 .modal-box li::before {
   content: '✓';
   position: absolute; left: 10px;
-  color: #3b82f6;
+  color: #7c3aed;
   font-weight: 700;
   font-size: 0.75rem;
 }
 .modal-btn {
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
   color: white;
   border: none;
   border-radius: 10px;
@@ -291,11 +276,10 @@ a { text-decoration: none; }
   width: 100%;
   margin-top: 4px;
   transition: all 0.2s;
-  letter-spacing: 0.01em;
 }
 .modal-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(99,102,241,0.4);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.35);
 }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }

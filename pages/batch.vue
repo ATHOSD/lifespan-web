@@ -34,48 +34,40 @@
 
 <style scoped>
 .page-header { margin-bottom: 28px; }
-.page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; color: #f1f5f9; }
-.page-desc { font-size: 0.875rem; color: #475569; margin-top: 5px; }
+.page-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; color: #1c1917; }
+.page-desc { font-size: 1rem; color: #a8a29e; margin-top: 5px; }
 
 .coming-card {
-  position: relative;
-  background: rgba(12, 22, 44, 0.7);
-  border: 1px solid rgba(255,255,255,0.07);
+  background: #ffffff;
+  border: 1px solid #e8e4dc;
   border-radius: 16px;
   padding: 64px 48px;
   text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 16px;
-  backdrop-filter: blur(12px);
-  overflow: hidden;
-}
-.cs-glow {
-  position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%);
-  pointer-events: none;
+  box-shadow: 0 1px 4px rgba(28, 25, 23, 0.05);
 }
 .cs-icon {
   width: 64px; height: 64px;
-  background: rgba(99,102,241,0.1);
-  border: 1px solid rgba(99,102,241,0.2);
+  background: #f3f0ff;
+  border: 1px solid #ddd6fe;
   border-radius: 16px;
   display: flex; align-items: center; justify-content: center;
 }
-.coming-card h2 { font-size: 1.4rem; font-weight: 700; color: #e2e8f0; letter-spacing: -0.02em; }
-.coming-card p { font-size: 0.9rem; color: #475569; max-width: 420px; line-height: 1.7; }
+.coming-card h2 { font-size: 1.4rem; font-weight: 700; color: #1c1917; letter-spacing: -0.02em; }
+.coming-card p { font-size: 0.95rem; color: #78716c; max-width: 420px; line-height: 1.7; }
 
 .feature-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; text-align: left; }
 .feature-item {
   display: flex; align-items: center; gap: 10px;
-  font-size: 0.845rem; color: #64748b;
+  font-size: 0.9rem; color: #57534e;
   padding: 10px 16px;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.04);
+  background: #faf9f6;
+  border: 1px solid #e8e4dc;
   border-radius: 9px;
 }
 .feature-dot {
   width: 6px; height: 6px; border-radius: 50%;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  background: linear-gradient(135deg, #7c3aed, #9333ea);
   flex-shrink: 0;
 }
 </style>
