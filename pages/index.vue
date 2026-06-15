@@ -1,37 +1,47 @@
 <template>
-  <div class="app">
-    <!-- Disclaimer modal -->
-    <div v-if="showDisclaimer" class="modal-backdrop">
-      <div class="modal">
-        <h2>Data Privacy Notice</h2>
-        <p>
-          This tool sends your MRI scan to <strong>Replicate</strong> (a third-party cloud service)
-          for processing. Please be aware:
-        </p>
-        <ul>
-          <li>Do <strong>not</strong> upload identifiable patient data.</li>
-          <li>Use anonymized or de-identified scans only.</li>
-          <li>This tool is for <strong>research purposes only</strong> and is not intended for clinical use.</li>
-        </ul>
-        <button class="btn-primary" @click="acceptDisclaimer">I Understand, Continue</button>
+  <div>
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Single Sample Analysis</h1>
+        <p class="page-desc">Upload an MRI scan to generate AI-powered brain tissue segmentation</p>
       </div>
     </div>
 
-    <header>
-      <h1>Lifespan Brain Segmentation</h1>
-    </header>
-
-    <main>
-      <!-- Upload Panel -->
-      <section class="upload-panel">
-        <div class="form-group">
-          <label>MRI Scan (.nii.gz)</label>
-          <input type="file" accept=".nii,.gz,application/gzip,application/octet-stream" @change="onFileChange" />
+    <!-- Config card -->
+    <div class="card">
+      <div class="config-grid">
+        <!-- File upload -->
+        <div class="field-group span-full">
+          <label class="field-label">MRI Scan</label>
+          <div
+            class="upload-zone"
+            :class="{ 'upload-active': isDragging, 'upload-filled': !!file }"
+            @click="fileInput?.click()"
+            @dragover.prevent="isDragging = true"
+            @dragleave.prevent="isDragging = false"
+            @drop.prevent="onDrop"
+          >
+            <input ref="fileInput" type="file" style="display:none" accept=".nii,.gz,application/gzip,application/octet-stream" @change="onFileChange" />
+            <div class="upload-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+                <path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M16 8l-4-4-4 4M12 4v12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="upload-text">
+              <span v-if="file" class="upload-filename">{{ file.name }}</span>
+              <template v-else>
+                <span class="upload-cta">Click to browse <span class="upload-muted">or drag & drop</span></span>
+              </template>
+            </div>
+            <span class="upload-hint">NIfTI format · .nii or .nii.gz</span>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label>Modality</label>
-          <select v-model="modality">
+        <!-- Modality -->
+        <div class="field-group">
+          <label class="field-label">Modality</label>
+          <select v-model="modality" class="field-select">
             <option>T1w</option>
             <option>T2w</option>
             <option>FA</option>
@@ -39,71 +49,128 @@
           </select>
         </div>
 
-        <div class="form-group">
-          <label>Age <span class="optional">(optional)</span></label>
+        <!-- Age -->
+        <div class="field-group">
+          <label class="field-label">Age <span class="optional-tag">optional</span></label>
           <div class="age-row">
-            <select v-model="ageType" class="age-type">
+            <select v-model="ageType" class="field-select" style="width:90px;flex-shrink:0">
               <option value="GA">GA</option>
               <option value="Postnatal">Postnatal</option>
             </select>
-            <input type="number" v-model="ageValue" min="0" max="9999" step="any"
-                 placeholder="--" class="age-num" @keydown="blockNonNumeric" @paste.prevent />
-            <select v-model="ageUnit" class="age-unit">
-              <option value="weeks">weeks</option>
-              <option value="months">months</option>
-              <option value="years">years</option>
+            <input
+              type="number" v-model="ageValue" min="0" max="9999" step="any"
+              placeholder="—" class="field-input"
+              @keydown="blockNonNumeric" @paste.prevent
+            />
+            <select v-model="ageUnit" class="field-select" style="width:74px;flex-shrink:0">
+              <option value="weeks">wk</option>
+              <option value="months">mo</option>
+              <option value="years">yr</option>
             </select>
           </div>
         </div>
 
-        <div class="form-group">
-          <label>Sex <span class="optional">(optional)</span></label>
-          <select v-model="sex">
-            <option value="">--</option>
+        <!-- Sex -->
+        <div class="field-group">
+          <label class="field-label">Sex <span class="optional-tag">optional</span></label>
+          <select v-model="sex" class="field-select">
+            <option value="">—</option>
             <option value="M">Male</option>
             <option value="F">Female</option>
           </select>
         </div>
 
-        <button :disabled="!file || loading" @click="runSegmentation">
-          {{ loading ? 'Running...' : 'Run Segmentation' }}
-        </button>
+        <!-- Run -->
+        <div class="field-group run-col">
+          <button class="btn-run" :disabled="!file || loading" @click="runSegmentation">
+            <span v-if="loading" class="spinner" />
+            <svg v-else viewBox="0 0 20 20" fill="currentColor" width="16" height="16">
+              <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.344-5.891a1.5 1.5 0 000-2.538L6.3 2.84z"/>
+            </svg>
+            {{ loading ? 'Processing…' : 'Run Segmentation' }}
+          </button>
+        </div>
+      </div>
 
-        <p v-if="error" class="error">{{ error }}</p>
-      </section>
+      <!-- Error -->
+      <div v-if="error" class="error-bar">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="16" height="16" style="flex-shrink:0">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+        </svg>
+        {{ error }}
+      </div>
+    </div>
 
-      <!-- Viewer -->
-      <section v-if="segUrl" class="viewer-panel">
-        <MriViewer :mri-url="mriUrl" :seg-url="segUrl" @volumes="onVolumes" />
-
-        <!-- Volume Table -->
-        <div v-if="volumes.length" class="volumes">
-          <div class="volumes-header">
-            <h2>Tissue Volumes</h2>
-            <a :href="segUrl" download="segmentation.nii.gz" class="btn-download">
-              Download Mask (.nii.gz)
+    <!-- Results -->
+    <Transition name="rise">
+      <div v-if="segUrl" class="results-grid">
+        <!-- Viewer -->
+        <div class="card viewer-card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Segmentation Preview</h2>
+              <p class="card-sub">Hover to inspect tissue labels · scroll to zoom</p>
+            </div>
+            <a :href="segUrl" download="segmentation.nii.gz" class="btn-dl">
+              <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+              </svg>
+              Download Mask
             </a>
           </div>
-          <table>
+          <MriViewer :mri-url="mriUrl" :seg-url="segUrl" @volumes="onVolumes" />
+        </div>
+
+        <!-- Volume table -->
+        <div v-if="volumes.length" class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Tissue Volumes</h2>
+              <p class="card-sub">{{ volumes.length }} regions · {{ (totalVolume / 1000).toFixed(0) }} cm³ ICV</p>
+            </div>
+          </div>
+          <table class="vol-table">
             <thead>
-              <tr><th>Label</th><th>Volume (mm³)</th><th>% ICV</th></tr>
+              <tr>
+                <th>Region</th>
+                <th style="text-align:right">Volume (mm³)</th>
+                <th style="text-align:right">% ICV</th>
+              </tr>
             </thead>
             <tbody>
               <tr v-for="v in volumes" :key="v.label">
-                <td>Label {{ v.label }}</td>
-                <td>{{ v.volume.toLocaleString() }}</td>
-                <td>{{ ((v.volume / totalVolume) * 100).toFixed(2) }}%</td>
+                <td>
+                  <span class="label-dot" :style="{ background: COLORS[v.label - 1] ?? '#666' }" />
+                  Label {{ v.label }}
+                </td>
+                <td style="text-align:right;font-variant-numeric:tabular-nums">{{ v.volume.toLocaleString() }}</td>
+                <td>
+                  <div class="pct-cell">
+                    <div class="pct-bar">
+                      <div class="pct-fill" :style="{ width: ((v.volume / totalVolume) * 100).toFixed(1) + '%', background: COLORS[v.label - 1] ?? '#666' }" />
+                    </div>
+                    <span class="pct-num">{{ ((v.volume / totalVolume) * 100).toFixed(1) }}%</span>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
-    </main>
+      </div>
+    </Transition>
   </div>
 </template>
 
 <script setup lang="ts">
+const COLORS = [
+  '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
+  '#7ABADC','#EC0DB0','#0C30FF','#DCD814','#2ACCA4',
+  '#FF8000','#67FFFF','#779FB0','#FFC8C8',
+]
+
+const fileInput = ref<HTMLInputElement | null>(null)
 const file = ref<File | null>(null)
+const isDragging = ref(false)
 const modality = ref('T1w')
 const ageType = ref('GA')
 const ageValue = ref<number | null>(null)
@@ -114,18 +181,8 @@ const error = ref('')
 const mriUrl = ref<string | null>(null)
 const segUrl = ref<string | null>(null)
 const volumes = ref<{ label: number; volume: number }[]>([])
-const totalVolume = computed(() => volumes.value.reduce((s, v) => s + v.volume, 0))
 
-const showDisclaimer = ref(false)
-onMounted(() => {
-  if (!sessionStorage.getItem('disclaimer-accepted')) {
-    showDisclaimer.value = true
-  }
-})
-function acceptDisclaimer() {
-  sessionStorage.setItem('disclaimer-accepted', '1')
-  showDisclaimer.value = false
-}
+const totalVolume = computed(() => volumes.value.reduce((s, v) => s + v.volume, 0))
 
 function onVolumes(data: { label: number; volume: number }[]) {
   volumes.value = data
@@ -137,14 +194,23 @@ function blockNonNumeric(e: KeyboardEvent) {
   if (!/^\d$/.test(e.key)) e.preventDefault()
 }
 
+function setFile(f: File) {
+  file.value = f
+  mriUrl.value = URL.createObjectURL(f)
+  segUrl.value = null
+  volumes.value = []
+  error.value = ''
+}
+
 function onFileChange(e: Event) {
-  const input = e.target as HTMLInputElement
-  file.value = input.files?.[0] || null
-  if (file.value) {
-    mriUrl.value = URL.createObjectURL(file.value)
-    segUrl.value = null
-    volumes.value = []
-  }
+  const f = (e.target as HTMLInputElement).files?.[0]
+  if (f) setFile(f)
+}
+
+function onDrop(e: DragEvent) {
+  isDragging.value = false
+  const f = e.dataTransfer?.files?.[0]
+  if (f) setFile(f)
 }
 
 async function runSegmentation() {
@@ -173,82 +239,150 @@ async function runSegmentation() {
 }
 </script>
 
-<style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 18px; }
-body { font-family: system-ui, sans-serif; background: #0f0f0f; color: #e0e0e0; }
+<style scoped>
+.page-header { margin-bottom: 28px; }
+.page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; color: #f1f5f9; }
+.page-desc { font-size: 0.875rem; color: #475569; margin-top: 5px; }
 
-.app { max-width: 1260px; margin: 0 auto; padding: 32px; }
-
-header { margin-bottom: 32px; }
-header h1 { font-size: 2rem; font-weight: 600; }
-
-/* Disclaimer modal */
-.modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.75);
-  display: flex; align-items: center; justify-content: center; z-index: 100;
+.card {
+  background: rgba(12, 22, 44, 0.7);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px;
+  padding: 26px;
+  backdrop-filter: blur(12px);
+  margin-bottom: 20px;
 }
-.modal {
-  background: #1e1e1e; border-radius: 14px; padding: 36px;
-  max-width: 520px; width: 90%; display: flex; flex-direction: column; gap: 16px;
-}
-.modal h2 { font-size: 1.3rem; }
-.modal p, .modal li { font-size: 0.95rem; color: #ccc; line-height: 1.6; }
-.modal ul { padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
-.modal strong { color: #fff; }
+.card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
+.card-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
+.card-sub { font-size: 0.775rem; color: #475569; margin-top: 3px; }
 
-.btn-primary {
-  background: #3b82f6; color: white; border: none; border-radius: 8px;
-  padding: 12px 28px; font-size: 1rem; cursor: pointer; align-self: flex-end; margin-top: 8px;
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  align-items: end;
 }
-.btn-primary:hover { background: #2563eb; }
+.span-full { grid-column: 1 / -1; }
 
-/* Upload panel */
-.upload-panel {
-  background: #1e1e1e; border-radius: 12px; padding: 32px;
-  display: flex; gap: 24px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 32px;
+.field-group { display: flex; flex-direction: column; gap: 8px; }
+.field-label { font-size: 0.72rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; }
+.optional-tag { font-size: 0.65rem; color: #2d3a4e; text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+
+.field-select, .field-input {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 9px;
+  color: #e2e8f0;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s;
 }
-
-.form-group { display: flex; flex-direction: column; gap: 8px; }
-.form-group label { font-size: 1rem; color: #aaa; }
-.optional { font-size: 0.8rem; color: #666; }
-
-input[type="file"], select, input[type="number"] {
-  background: #2a2a2a; border: 1px solid #444; border-radius: 8px;
-  color: #e0e0e0; padding: 12px 16px; font-size: 1rem;
+.field-select:focus, .field-input:focus {
+  outline: none;
+  border-color: rgba(59,130,246,0.5);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.08);
 }
-select { cursor: pointer; }
-input[type="number"] { width: 100px; }
+.field-select { cursor: pointer; }
 input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 
-.age-row { display: flex; gap: 8px; align-items: center; }
-.age-type { width: 110px; }
-.age-num { width: 100px; padding: 12px 10px; }
-.age-unit { width: 110px; }
+.age-row { display: flex; gap: 6px; align-items: center; }
 
-button {
-  background: #3b82f6; color: white; border: none; border-radius: 8px;
-  padding: 12px 32px; font-size: 1.1rem; cursor: pointer; height: fit-content;
+.upload-zone {
+  display: flex; align-items: center; gap: 14px;
+  padding: 16px 20px;
+  border: 1.5px dashed rgba(255,255,255,0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.01);
 }
-button:disabled { background: #555; cursor: not-allowed; }
-button:hover:not(:disabled) { background: #2563eb; }
-
-.error { color: #f87171; font-size: 1rem; width: 100%; }
-
-.viewer-panel { display: flex; flex-direction: column; gap: 32px; }
-
-/* Volumes table */
-.volumes { background: #1e1e1e; border-radius: 12px; padding: 28px; }
-.volumes-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-.volumes-header h2 { font-size: 1.2rem; }
-.btn-download {
-  background: #22c55e; color: #000; border-radius: 8px;
-  padding: 8px 20px; font-size: 0.9rem; font-weight: 600;
-  text-decoration: none; white-space: nowrap;
+.upload-zone:hover, .upload-active {
+  border-color: rgba(59,130,246,0.45);
+  background: rgba(59,130,246,0.04);
 }
-.btn-download:hover { background: #16a34a; color: #fff; }
+.upload-filled {
+  border-style: solid;
+  border-color: rgba(99,102,241,0.35);
+  background: rgba(99,102,241,0.04);
+}
+.upload-icon-wrap {
+  width: 38px; height: 38px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  color: #475569; flex-shrink: 0;
+}
+.upload-filled .upload-icon-wrap { background: rgba(99,102,241,0.1); color: #818cf8; }
+.upload-text { flex: 1; }
+.upload-cta { font-size: 0.875rem; color: #94a3b8; }
+.upload-muted { color: #475569; }
+.upload-filename { font-size: 0.875rem; color: #a5b4fc; font-weight: 500; word-break: break-all; }
+.upload-hint { font-size: 0.72rem; color: #2d3a4e; white-space: nowrap; }
 
-table { width: 100%; border-collapse: collapse; font-size: 1rem; }
-th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #333; }
-th { color: #aaa; font-weight: 500; }
+.run-col { justify-content: flex-end; }
+.btn-run {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
+  color: #fff; border: none; border-radius: 10px;
+  padding: 11px 26px; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
+}
+.btn-run:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(99,102,241,0.35); }
+.btn-run:active:not(:disabled) { transform: translateY(0); }
+.btn-run:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.spinner {
+  width: 15px; height: 15px;
+  border: 2px solid rgba(255,255,255,0.25);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.65s linear infinite; flex-shrink: 0;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-bar {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 18px; padding: 11px 16px;
+  background: rgba(239,68,68,0.07);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 9px; color: #f87171; font-size: 0.845rem;
+}
+
+.results-grid { display: flex; flex-direction: column; gap: 20px; }
+
+.btn-dl {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(34,197,94,0.08);
+  border: 1px solid rgba(34,197,94,0.18);
+  color: #4ade80; border-radius: 8px; padding: 7px 16px;
+  font-size: 0.8rem; font-weight: 600;
+  text-decoration: none; white-space: nowrap; transition: all 0.15s;
+}
+.btn-dl:hover { background: rgba(34,197,94,0.14); color: #86efac; }
+
+.vol-table { width: 100%; border-collapse: collapse; font-size: 0.845rem; }
+.vol-table th {
+  color: #334155; font-weight: 600; font-size: 0.68rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  padding: 6px 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.vol-table td {
+  padding: 10px 10px; color: #94a3b8;
+  border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle;
+}
+.vol-table tbody tr:last-child td { border-bottom: none; }
+.vol-table tbody tr:hover td { background: rgba(255,255,255,0.02); color: #cbd5e1; }
+
+.label-dot {
+  display: inline-block; width: 8px; height: 8px;
+  border-radius: 50%; margin-right: 9px; vertical-align: middle;
+}
+.pct-cell { display: flex; align-items: center; justify-content: flex-end; gap: 10px; }
+.pct-bar { width: 80px; height: 4px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+.pct-fill { height: 100%; border-radius: 999px; opacity: 0.75; }
+.pct-num { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+.rise-enter-active { transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.rise-enter-from { opacity: 0; transform: translateY(24px); }
 </style>

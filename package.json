@@ -8,7 +8,8 @@
     "start": "node .output/server/index.mjs"
   },
   "dependencies": {
-    "nuxt": "^3.13.0",
-    "@niivue/niivue": "^0.46.0"
+    "@niivue/niivue": "^0.46.0",
+    "@nuxt/ui": "^4.3.0",
+    "nuxt": "^3.13.0"
   }
 }
