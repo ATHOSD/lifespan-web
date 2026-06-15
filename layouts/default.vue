@@ -133,7 +133,7 @@ a { text-decoration: none; }
   box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
 }
 .brand-name {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: -0.03em;
   color: #f1f5f9;
@@ -146,13 +146,13 @@ a { text-decoration: none; }
 }
 .navbar-right { display: flex; align-items: center; gap: 12px; }
 .version-pill {
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   font-weight: 500;
   color: #475569;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 999px;
-  padding: 4px 12px;
+  padding: 5px 14px;
   letter-spacing: 0.04em;
 }
 

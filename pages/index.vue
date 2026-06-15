@@ -126,7 +126,7 @@
           <div class="card-header">
             <div>
               <h2 class="card-title">Tissue Volumes</h2>
-              <p class="card-sub">{{ volumes.length }} regions · {{ (totalVolume / 1000).toFixed(0) }} cm³ ICV</p>
+              <p class="card-sub">{{ volumes.length }} regions · {{ (totalVolume / 1000).toFixed(0) }} cm³ total labeled</p>
             </div>
           </div>
           <table class="vol-table">
@@ -134,7 +134,7 @@
               <tr>
                 <th>Region</th>
                 <th style="text-align:right">Volume (mm³)</th>
-                <th style="text-align:right">% ICV</th>
+                <th style="text-align:right">% Total</th>
               </tr>
             </thead>
             <tbody>
