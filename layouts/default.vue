@@ -185,9 +185,9 @@ a { text-decoration: none; }
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 9px 10px;
+  padding: 10px 10px;
   border-radius: 9px;
-  font-size: 0.845rem;
+  font-size: 0.925rem;
   font-weight: 500;
   color: #64748b;
   cursor: pointer;

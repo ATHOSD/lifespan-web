@@ -50,7 +50,7 @@
         </div>
 
         <!-- Age -->
-        <div class="field-group">
+        <div class="field-group span-2">
           <label class="field-label">Age <span class="optional-tag">optional</span></label>
           <div class="age-row">
             <select v-model="ageType" class="field-select" style="width:90px;flex-shrink:0">
@@ -241,40 +241,41 @@ async function runSegmentation() {
 
 <style scoped>
 .page-header { margin-bottom: 28px; }
-.page-title { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; color: #f1f5f9; }
-.page-desc { font-size: 0.875rem; color: #475569; margin-top: 5px; }
+.page-title { font-size: 1.75rem; font-weight: 700; letter-spacing: -0.03em; color: #f1f5f9; }
+.page-desc { font-size: 1rem; color: #475569; margin-top: 6px; }
 
 .card {
   background: rgba(12, 22, 44, 0.7);
   border: 1px solid rgba(255,255,255,0.07);
   border-radius: 16px;
-  padding: 26px;
+  padding: 28px;
   backdrop-filter: blur(12px);
   margin-bottom: 20px;
 }
 .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
-.card-title { font-size: 1rem; font-weight: 600; color: #e2e8f0; }
-.card-sub { font-size: 0.775rem; color: #475569; margin-top: 3px; }
+.card-title { font-size: 1.1rem; font-weight: 600; color: #e2e8f0; }
+.card-sub { font-size: 0.875rem; color: #475569; margin-top: 3px; }
 
 .config-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 20px;
   align-items: end;
 }
 .span-full { grid-column: 1 / -1; }
+.span-2 { grid-column: span 2; }
 
 .field-group { display: flex; flex-direction: column; gap: 8px; }
-.field-label { font-size: 0.72rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; }
-.optional-tag { font-size: 0.65rem; color: #2d3a4e; text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 4px; }
+.field-label { font-size: 0.78rem; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.08em; }
+.optional-tag { font-size: 0.7rem; color: #2d3a4e; text-transform: none; letter-spacing: 0; font-weight: 400; margin-left: 4px; }
 
 .field-select, .field-input {
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.09);
   border-radius: 9px;
   color: #e2e8f0;
-  padding: 10px 12px;
-  font-size: 0.875rem;
+  padding: 11px 13px;
+  font-size: 0.95rem;
   width: 100%;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -315,17 +316,17 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 }
 .upload-filled .upload-icon-wrap { background: rgba(99,102,241,0.1); color: #818cf8; }
 .upload-text { flex: 1; }
-.upload-cta { font-size: 0.875rem; color: #94a3b8; }
+.upload-cta { font-size: 0.95rem; color: #94a3b8; }
 .upload-muted { color: #475569; }
-.upload-filename { font-size: 0.875rem; color: #a5b4fc; font-weight: 500; word-break: break-all; }
-.upload-hint { font-size: 0.72rem; color: #2d3a4e; white-space: nowrap; }
+.upload-filename { font-size: 0.95rem; color: #a5b4fc; font-weight: 500; word-break: break-all; }
+.upload-hint { font-size: 0.78rem; color: #2d3a4e; white-space: nowrap; }
 
 .run-col { justify-content: flex-end; }
 .btn-run {
   display: inline-flex; align-items: center; gap: 8px;
   background: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
   color: #fff; border: none; border-radius: 10px;
-  padding: 11px 26px; font-size: 0.9rem; font-weight: 600;
+  padding: 12px 28px; font-size: 1rem; font-weight: 600;
   cursor: pointer; transition: all 0.2s ease; white-space: nowrap;
 }
 .btn-run:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 10px 30px rgba(99,102,241,0.35); }
@@ -343,10 +344,10 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 
 .error-bar {
   display: flex; align-items: center; gap: 8px;
-  margin-top: 18px; padding: 11px 16px;
+  margin-top: 18px; padding: 12px 16px;
   background: rgba(239,68,68,0.07);
   border: 1px solid rgba(239,68,68,0.15);
-  border-radius: 9px; color: #f87171; font-size: 0.845rem;
+  border-radius: 9px; color: #f87171; font-size: 0.95rem;
 }
 
 .results-grid { display: flex; flex-direction: column; gap: 20px; }
@@ -361,9 +362,9 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 }
 .btn-dl:hover { background: rgba(34,197,94,0.14); color: #86efac; }
 
-.vol-table { width: 100%; border-collapse: collapse; font-size: 0.845rem; }
+.vol-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; }
 .vol-table th {
-  color: #334155; font-weight: 600; font-size: 0.68rem;
+  color: #334155; font-weight: 600; font-size: 0.75rem;
   text-transform: uppercase; letter-spacing: 0.08em;
   padding: 6px 10px 10px; border-bottom: 1px solid rgba(255,255,255,0.05);
 }
