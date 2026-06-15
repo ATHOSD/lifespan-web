@@ -111,7 +111,7 @@ a { text-decoration: none; }
 
 /* ── Navbar ─────────────────────────────── */
 .navbar {
-  height: 58px;
+  height: 68px;
   background: rgba(6, 14, 30, 0.96);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -133,9 +133,9 @@ a { text-decoration: none; }
   box-shadow: 0 0 16px rgba(99, 102, 241, 0.4);
 }
 .brand-name {
-  font-size: 1.4rem;
+  font-size: 2.0rem;
   font-weight: 700;
-  letter-spacing: -0.03em;
+  letter-spacing: 0.06em;
   color: #f1f5f9;
 }
 .brand-accent {
@@ -157,7 +157,7 @@ a { text-decoration: none; }
 }
 
 /* ── Body ───────────────────────────────── */
-.body { display: flex; padding-top: 58px; flex: 1; }
+.body { display: flex; padding-top: 68px; flex: 1; }
 
 /* ── Sidebar ────────────────────────────── */
 .sidebar {
@@ -166,7 +166,7 @@ a { text-decoration: none; }
   background: rgba(6, 12, 26, 0.7);
   border-right: 1px solid rgba(255,255,255,0.05);
   position: fixed;
-  top: 58px; left: 0; bottom: 0;
+  top: 68px; left: 0; bottom: 0;
   display: flex;
   flex-direction: column;
   padding: 20px 10px 16px;
