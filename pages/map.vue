@@ -81,8 +81,11 @@ onMounted(async () => {
   const map = L.map(mapEl.value, {
     center: [20, 0],
     zoom: 2,
-    minZoom: 1,
+    minZoom: 2,
     maxZoom: 6,
+    worldCopyJump: false,
+    maxBounds: [[-90, -180], [90, 180]],
+    maxBoundsViscosity: 1.0,
     zoomControl: true,
     attributionControl: true,
   })
@@ -91,6 +94,7 @@ onMounted(async () => {
     attribution: '© <a href="https://carto.com">CARTO</a> © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     subdomains: 'abcd',
     maxZoom: 19,
+    noWrap: true,
   }).addTo(map)
 
   for (const v of visits.value) {
