@@ -8,6 +8,9 @@ export default defineNuxtConfig({
   nitro: {
     preset: 'node-server',
     serveStatic: 'node',
+    externals: {
+      external: ['pg', 'pg-pool', 'pg-types', 'pg-protocol'],
+    },
   },
   colorMode: {
     preference: 'dark',
