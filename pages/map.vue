@@ -21,26 +21,6 @@
       <div ref="mapEl" class="map-container" />
     </div>
 
-    <div v-if="recentVisits.length" class="card">
-      <h2 class="card-title" style="margin-bottom:16px">Recent Requests</h2>
-      <table class="visit-table">
-        <thead>
-          <tr>
-            <th>Location</th>
-            <th>Country</th>
-            <th style="text-align:right">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(v, i) in recentVisits" :key="i">
-            <td>{{ v.city || '—' }}</td>
-            <td>{{ v.country || '—' }}</td>
-            <td style="text-align:right;color:#a8a29e">{{ formatTime(v.created_at) }}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
     <div v-if="!loading && visits.length === 0" class="empty-card">
       <div class="empty-icon">🗺️</div>
       <p>No visits recorded yet. Run a segmentation to see data here.</p>
@@ -143,7 +123,7 @@ onMounted(async () => {
 }
 .card-title { font-size: 1.1rem; font-weight: 600; color: #1c1917; padding: 0 8px; }
 
-.map-container { width: 100%; height: 480px; border-radius: 10px; }
+.map-container { width: 100%; height: 680px; border-radius: 10px; }
 
 .visit-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; padding: 12px; }
 .visit-table th {
