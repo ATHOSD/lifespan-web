@@ -10,6 +10,10 @@
   "dependencies": {
     "@niivue/niivue": "^0.46.0",
     "@nuxt/ui": "^4.3.0",
-    "nuxt": "^3.13.0"
+    "@types/leaflet": "^1.9.21",
+    "@types/pg": "^8.20.0",
+    "leaflet": "^1.9.4",
+    "nuxt": "^3.13.0",
+    "pg": "^8.21.0"
   }
 }

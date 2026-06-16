@@ -61,6 +61,13 @@
             <span>Batch Processing</span>
             <span class="soon-tag">Soon</span>
           </NuxtLink>
+          <NuxtLink to="/map" class="nav-item" :class="{ active: route.path === '/map' }">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+              <path d="M2 5l6-2 4 2 6-2v12l-6 2-4-2-6 2V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M8 3v12M12 5v12" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            <span>Usage Map</span>
+          </NuxtLink>
         </nav>
         <div class="sidebar-footer">
           <div class="sidebar-divider" />

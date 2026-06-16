@@ -1,5 +1,22 @@
+import { logVisit } from '../utils/db'
+
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
+
+  // Log visitor IP + geolocation (non-blocking)
+  const ip = (getRequestHeader(event, 'x-forwarded-for') ?? '').split(',')[0].trim()
+    || getRequestIP(event) || ''
+  if (ip && ip !== '127.0.0.1' && ip !== '::1') {
+    fetch(`http://ip-api.com/json/${ip}?fields=status,lat,lon,country,city`)
+      .then(r => r.json())
+      .then(geo => {
+        if (geo.status === 'success') {
+          logVisit(ip, geo.lat, geo.lon, geo.country, geo.city).catch(() => {})
+        }
+      })
+      .catch(() => {})
+  }
+
   const form = await readMultipartFormData(event)
   if (!form) throw createError({ statusCode: 400, message: 'No form data' })
 
