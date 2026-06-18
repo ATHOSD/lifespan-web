@@ -83,11 +83,26 @@
               <select v-model="f.modality" class="mod-sel" :disabled="f.status !== 'queued'" @click.stop>
                 <option>T1w</option><option>T2w</option><option>FA</option><option>MD</option>
               </select>
+              <!-- Add to curve -->
+              <button v-if="f.segUrl" class="row-icon-btn" :class="{ 'icon-active': f.addedToCurve }" @click.stop="f.addedToCurve = !f.addedToCurve" :title="f.addedToCurve ? 'Remove from curve' : 'Add to growth curve'">
+                <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                  <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path v-if="!f.addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path v-else d="M10.5 2l2 2L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <!-- Download -->
               <a v-if="f.segUrl" :href="f.segUrl" download="segmentation.nii.gz" class="row-dl" @click.stop title="Download mask">
                 <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
                   <path d="M2 12h12v1.5H2V12zm5.25-3.44V2h1.5v6.56l2.47-2.47 1.06 1.06L8 11.39l-4.28-4.24 1.06-1.06 2.47 2.47z"/>
                 </svg>
               </a>
+              <!-- Delete -->
+              <button class="row-del" :disabled="f.status === 'running'" @click.stop="deleteFile(f)" title="Remove file">
+                <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                  <path d="M2 4h12M5 4V2.5h6V4M6.5 7v5M9.5 7v5M3 4l.8 9h8.4l.8-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
             </div>
             <!-- Line 2: age + sex inputs -->
             <div class="row-age" @click.stop>
@@ -160,6 +175,7 @@ interface BatchFile {
   ageValue: number | null
   ageUnit: 'weeks' | 'months' | 'years'
   sex: 'Male' | 'Female' | 'Unknown'
+  addedToCurve: boolean
   status: 'queued' | 'running' | 'done' | 'failed'
   mriUrl: string
   segUrl: string | null
@@ -190,6 +206,7 @@ function addFiles(newFiles: FileList | File[]) {
       ageValue: null,
       ageUnit: 'years',
       sex: 'Unknown' as const,
+      addedToCurve: false,
       status: 'queued',
       mriUrl: URL.createObjectURL(file),
       segUrl: null,
@@ -216,6 +233,11 @@ function select(f: BatchFile) {
 
 function onVolumes(data: { label: number; volume: number }[]) {
   if (selected.value) selected.value.volumes = data
+}
+
+function deleteFile(f: BatchFile) {
+  if (selected.value?.id === f.id) selected.value = null
+  files.value = files.value.filter(item => item.id !== f.id)
 }
 
 function clearAll() {
@@ -380,6 +402,16 @@ async function runAll() {
 }
 .mod-sel:disabled { opacity: 0.5; }
 
+.row-icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #f3f0ff; border: 1px solid #ddd6fe; color: #7c3aed;
+  flex-shrink: 0; cursor: pointer; transition: all 0.15s;
+}
+.row-icon-btn:hover { background: #ede9fe; }
+.row-icon-btn.icon-active { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+.row-icon-btn.icon-active:hover { background: #dcfce7; }
+
 .row-dl {
   display: flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: 6px;
@@ -387,6 +419,15 @@ async function runAll() {
   flex-shrink: 0; text-decoration: none; transition: background 0.15s;
 }
 .row-dl:hover { background: #dcfce7; }
+
+.row-del {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px; border-radius: 6px;
+  background: #faf9f6; border: 1px solid #e8e4dc; color: #a8a29e;
+  flex-shrink: 0; cursor: pointer; transition: all 0.15s;
+}
+.row-del:hover:not(:disabled) { background: #fef2f2; border-color: #fecaca; color: #dc2626; }
+.row-del:disabled { opacity: 0.3; cursor: not-allowed; }
 
 /* ── Right panel ── */
 .right-panel { display: flex; flex-direction: column; gap: 20px; min-width: 0; }

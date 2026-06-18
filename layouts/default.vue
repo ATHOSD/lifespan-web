@@ -60,6 +60,12 @@
             </svg>
             <span>Batch Processing</span>
           </NuxtLink>
+          <NuxtLink to="/curve" class="nav-item" :class="{ active: route.path === '/curve' }">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+              <path d="M2 15L6 10l4 3 4.5-6L18 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>Growth Curve</span>
+          </NuxtLink>
           <NuxtLink to="/map" class="nav-item" :class="{ active: route.path === '/map' }">
             <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
               <path d="M2 5l6-2 4 2 6-2v12l-6 2-4-2-6 2V5z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>

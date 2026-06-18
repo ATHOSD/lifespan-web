@@ -62,10 +62,10 @@
               placeholder="—" class="field-input"
               @keydown="blockNonNumeric" @paste.prevent
             />
-            <select v-model="ageUnit" class="field-select" style="width:74px;flex-shrink:0">
-              <option value="weeks">wk</option>
-              <option value="months">mo</option>
-              <option value="years">yr</option>
+            <select v-model="ageUnit" class="field-select" style="width:80px;flex-shrink:0">
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
             </select>
           </div>
         </div>
@@ -111,12 +111,22 @@
               <h2 class="card-title">Segmentation Preview</h2>
               <p class="card-sub">Hover to inspect tissue labels · scroll to zoom</p>
             </div>
-            <a :href="segUrl" download="segmentation.nii.gz" class="btn-dl">
-              <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
-                <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
-              </svg>
-              Download Mask
-            </a>
+            <div class="header-actions">
+              <button class="btn-curve" :class="{ 'curve-added': addedToCurve }" @click="addedToCurve = !addedToCurve">
+                <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
+                  <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path v-if="!addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path v-else d="M10.5 2l2 2L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                {{ addedToCurve ? 'Added to Curve' : 'Add to Curve' }}
+              </button>
+              <a :href="segUrl" download="segmentation.nii.gz" class="btn-dl">
+                <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                </svg>
+                Download Mask
+              </a>
+            </div>
           </div>
           <MriViewer :mri-url="mriUrl" :seg-url="segUrl" @volumes="onVolumes" />
         </div>
@@ -181,6 +191,7 @@ const error = ref('')
 const mriUrl = ref<string | null>(null)
 const segUrl = ref<string | null>(null)
 const volumes = ref<{ label: number; volume: number }[]>([])
+const addedToCurve = ref(false)
 
 const totalVolume = computed(() => volumes.value.reduce((s, v) => s + v.volume, 0))
 
@@ -219,6 +230,7 @@ async function runSegmentation() {
   error.value = ''
   segUrl.value = null
   volumes.value = []
+  addedToCurve.value = false
 
   try {
     const form = new FormData()
@@ -351,6 +363,18 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 }
 
 .results-grid { display: flex; flex-direction: column; gap: 20px; }
+
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+.btn-curve {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: #f3f0ff; border: 1px solid #ddd6fe; color: #7c3aed;
+  border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.btn-curve:hover { background: #ede9fe; }
+.btn-curve.curve-added { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
+.btn-curve.curve-added:hover { background: #dcfce7; }
 
 .btn-dl {
   display: inline-flex; align-items: center; gap: 6px;
