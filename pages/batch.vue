@@ -93,18 +93,18 @@
             <div class="row-age" @click.stop>
               <select v-model="f.ageType" class="age-sel-sm" :disabled="f.status !== 'queued'">
                 <option value="GA">GA</option>
-                <option value="Postnatal">PNA</option>
+                <option value="Postnatal">Postnatal</option>
               </select>
               <input v-model.number="f.ageValue" type="number" class="age-val-sm" placeholder="Age" step="any" min="0" :disabled="f.status !== 'queued'" @click.stop />
               <select v-model="f.ageUnit" class="age-sel-sm" :disabled="f.status !== 'queued'">
-                <option value="weeks">Wks</option>
-                <option value="months">Mos</option>
-                <option value="years">Yrs</option>
+                <option value="weeks">Weeks</option>
+                <option value="months">Months</option>
+                <option value="years">Years</option>
               </select>
               <span class="row-meta-sep">·</span>
               <select v-model="f.sex" class="age-sel-sm" :disabled="f.status !== 'queued'">
-                <option value="Male">M</option>
-                <option value="Female">F</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
                 <option value="Unknown">—</option>
               </select>
               <span class="row-hint">(for growth curve · optional)</span>
@@ -248,7 +248,7 @@ async function runAll() {
 <style scoped>
 .batch-root {
   display: grid;
-  grid-template-columns: 440px 1fr;
+  grid-template-columns: minmax(400px, 1fr) 600px;
   gap: 20px;
   align-items: start;
   min-height: calc(100vh - 68px - 64px);
@@ -339,15 +339,15 @@ async function runAll() {
 .row-main { display: flex; align-items: center; gap: 8px; }
 .row-age { display: flex; align-items: center; gap: 5px; padding-left: 1px; }
 .age-sel-sm {
-  font-size: 0.72rem; color: #57534e;
+  font-size: 0.8rem; color: #57534e;
   background: #faf9f6; border: 1px solid #e8e4dc;
-  border-radius: 5px; padding: 3px 5px; cursor: pointer;
+  border-radius: 6px; padding: 4px 6px; cursor: pointer;
 }
 .age-sel-sm:disabled { opacity: 0.45; cursor: not-allowed; }
 .age-val-sm {
-  font-size: 0.72rem; color: #57534e;
+  font-size: 0.8rem; color: #57534e;
   background: #faf9f6; border: 1px solid #e8e4dc;
-  border-radius: 5px; padding: 3px 6px; width: 58px;
+  border-radius: 6px; padding: 4px 7px; width: 64px;
 }
 .age-val-sm:disabled { opacity: 0.45; cursor: not-allowed; }
 .row-meta-sep { font-size: 0.7rem; color: #d6d3cd; }
@@ -369,7 +369,7 @@ async function runAll() {
 }
 
 .file-name-wrap { flex: 1; min-width: 0; }
-.file-name { font-size: 0.8rem; color: #57534e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.file-name { font-size: 0.875rem; color: #57534e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .file-err { font-size: 0.72rem; color: #dc2626; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .mod-sel {
@@ -395,9 +395,6 @@ async function runAll() {
   background: #ffffff; border: 1px solid #e8e4dc;
   border-radius: 16px; padding: 24px;
   box-shadow: 0 1px 4px rgba(28,25,23,0.05);
-  max-width: 600px;
-  margin-left: auto;
-  width: 100%;
 }
 .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
 .card-title { font-size: 1rem; font-weight: 600; color: #1c1917; }
