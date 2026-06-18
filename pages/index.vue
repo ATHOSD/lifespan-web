@@ -270,7 +270,7 @@ async function runSegmentation() {
 
 .config-grid {
   display: grid;
-  grid-template-columns: 140px auto 110px 1fr;
+  grid-template-columns: 140px auto 220px 1fr;
   gap: 20px;
   align-items: end;
 }
