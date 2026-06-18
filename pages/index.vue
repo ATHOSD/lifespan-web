@@ -51,7 +51,7 @@
 
         <!-- Age -->
         <div class="field-group span-2">
-          <label class="field-label">Age <span class="optional-tag">optional</span></label>
+          <label class="field-label">Age <span class="optional-tag">for growth curve · optional</span></label>
           <div class="age-row">
             <select v-model="ageType" class="field-select" style="width:90px;flex-shrink:0">
               <option value="GA">GA</option>
@@ -72,7 +72,7 @@
 
         <!-- Sex -->
         <div class="field-group">
-          <label class="field-label">Sex <span class="optional-tag">optional</span></label>
+          <label class="field-label">Sex <span class="optional-tag">for growth curve · optional</span></label>
           <select v-model="sex" class="field-select">
             <option value="">—</option>
             <option value="M">Male</option>

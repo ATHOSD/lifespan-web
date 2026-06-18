@@ -25,7 +25,7 @@
 const contacts = [
   { name: 'Author 1', role: 'First Author', email: 'author1@example.edu' },
   { name: 'Author 2', role: 'Second Author', email: 'author2@example.edu' },
-  { name: 'Dingyi Zhang', role: 'Third Author', email: 'zhangdy1013@gmail.com' },
+  { name: 'Dingyi Zhang', role: 'Third Author', email: 'dingyi.zhang@emory.edu' },
   { name: 'Yun Wang', role: 'Principal Investigator', email: 'yun.wang2@emory.edu' },
 ]
 
