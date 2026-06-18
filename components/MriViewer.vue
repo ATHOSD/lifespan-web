@@ -13,6 +13,7 @@ import { onMounted, onBeforeUnmount, watch, ref } from 'vue'
 const props = defineProps<{
   mriUrl: string | null
   segUrl: string | null
+  multiplanarLayout?: number
 }>()
 
 const emit = defineEmits<{
@@ -32,7 +33,7 @@ onMounted(async () => {
     backColor: [0.05, 0.05, 0.05, 1],
     crosshairColor: [1, 0, 0, 1],
     onLocationChange: handleLocation,
-    multiplanarLayout: 2,
+    multiplanarLayout: props.multiplanarLayout ?? 0,
   })
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)

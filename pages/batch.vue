@@ -89,7 +89,7 @@
                 </svg>
               </a>
             </div>
-            <!-- Line 2: age inputs -->
+            <!-- Line 2: age + sex inputs -->
             <div class="row-age" @click.stop>
               <select v-model="f.ageType" class="age-sel-sm" :disabled="f.status !== 'queued'">
                 <option value="GA">GA</option>
@@ -100,6 +100,12 @@
                 <option value="weeks">Wks</option>
                 <option value="months">Mos</option>
                 <option value="years">Yrs</option>
+              </select>
+              <span class="row-meta-sep">·</span>
+              <select v-model="f.sex" class="age-sel-sm" :disabled="f.status !== 'queued'">
+                <option value="Male">M</option>
+                <option value="Female">F</option>
+                <option value="Unknown">—</option>
               </select>
             </div>
           </div>
@@ -123,7 +129,7 @@
               Download Mask
             </a>
           </div>
-          <MriViewer :key="selected.id" :mri-url="selected.mriUrl" :seg-url="selected.segUrl" @volumes="onVolumes" />
+          <MriViewer :key="selected.id" :mri-url="selected.mriUrl" :seg-url="selected.segUrl" :multiplanar-layout="2" @volumes="onVolumes" />
         </div>
 
       </template>
@@ -152,6 +158,7 @@ interface BatchFile {
   ageType: 'GA' | 'Postnatal'
   ageValue: number | null
   ageUnit: 'weeks' | 'months' | 'years'
+  sex: 'Male' | 'Female' | 'Unknown'
   status: 'queued' | 'running' | 'done' | 'failed'
   mriUrl: string
   segUrl: string | null
@@ -181,6 +188,7 @@ function addFiles(newFiles: FileList | File[]) {
       ageType: 'Postnatal',
       ageValue: null,
       ageUnit: 'years',
+      sex: 'Unknown' as const,
       status: 'queued',
       mriUrl: URL.createObjectURL(file),
       segUrl: null,
@@ -241,7 +249,6 @@ async function runAll() {
   display: grid;
   grid-template-columns: 400px 1fr;
   gap: 20px;
-  max-width: 1020px;
   align-items: start;
   min-height: calc(100vh - 68px - 64px);
 }
@@ -342,6 +349,7 @@ async function runAll() {
   border-radius: 5px; padding: 3px 6px; width: 58px;
 }
 .age-val-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+.row-meta-sep { font-size: 0.7rem; color: #d6d3cd; }
 
 .badge-wrap { flex-shrink: 0; }
 .badge {
@@ -412,9 +420,6 @@ async function runAll() {
 .pct-bar { width: 80px; height: 4px; background: #f0ede8; border-radius: 999px; overflow: hidden; }
 .pct-fill { height: 100%; border-radius: 999px; opacity: 0.8; }
 .pct-num { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
-
-/* ── Right panel viewer size ── */
-.right-panel :deep(.viewer-container) { height: 370px; }
 
 /* ── Empty state ── */
 .empty-right {
