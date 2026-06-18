@@ -32,6 +32,7 @@ onMounted(async () => {
     backColor: [0.05, 0.05, 0.05, 1],
     crosshairColor: [1, 0, 0, 1],
     onLocationChange: handleLocation,
+    multiplanarLayout: 2,
   })
   await nv.attachToCanvas(canvas.value)
   nv.setSliceType(nv.sliceTypeMultiplanar)

@@ -8,6 +8,25 @@
         <p class="page-desc">Process multiple MRI scans sequentially</p>
       </div>
 
+      <!-- Age settings -->
+      <div class="settings-card">
+        <div class="settings-row">
+          <span class="settings-label">Age</span>
+          <div class="age-inputs">
+            <select v-model="ageType" class="form-sel">
+              <option value="GA">Gestational</option>
+              <option value="Postnatal">Postnatal</option>
+            </select>
+            <input v-model.number="ageValue" type="number" class="age-inp" placeholder="—" step="any" min="0" />
+            <select v-model="ageUnit" class="form-sel">
+              <option value="weeks">Weeks</option>
+              <option value="months">Months</option>
+              <option value="years">Years</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
       <!-- Upload zone -->
       <div
         class="upload-zone"
@@ -117,38 +136,6 @@
           <MriViewer :key="selected.id" :mri-url="selected.mriUrl" :seg-url="selected.segUrl" @volumes="onVolumes" />
         </div>
 
-        <div v-if="selected.volumes.length" class="card">
-          <div class="card-header">
-            <div>
-              <h2 class="card-title">Tissue Volumes</h2>
-              <p class="card-sub">{{ selected.volumes.length }} regions · {{ (selectedTotal / 1000).toFixed(0) }} cm³ total</p>
-            </div>
-          </div>
-          <table class="vol-table">
-            <thead>
-              <tr>
-                <th>Region</th>
-                <th style="text-align:right">Volume (mm³)</th>
-                <th style="text-align:right">% Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="v in selected.volumes" :key="v.label">
-                <td>
-                  <span class="label-dot" :style="{ background: COLORS[v.label-1] ?? '#666' }" />
-                  Label {{ v.label }}
-                </td>
-                <td style="text-align:right;font-variant-numeric:tabular-nums">{{ v.volume.toLocaleString() }}</td>
-                <td>
-                  <div class="pct-cell">
-                    <div class="pct-bar"><div class="pct-fill" :style="{ width: ((v.volume/selectedTotal)*100).toFixed(1)+'%', background: COLORS[v.label-1] ?? '#666' }" /></div>
-                    <span class="pct-num">{{ ((v.volume/selectedTotal)*100).toFixed(1) }}%</span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
       </template>
 
       <div v-else class="empty-right">
@@ -168,12 +155,6 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 
-const COLORS = [
-  '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
-  '#7ABADC','#EC0DB0','#0C30FF','#DCD814','#2ACCA4',
-  '#FF8000','#67FFFF','#779FB0','#FFC8C8',
-]
-
 interface BatchFile {
   id: string
   file: File
@@ -191,10 +172,13 @@ const files = ref<BatchFile[]>([])
 const running = ref(false)
 const selected = ref<BatchFile | null>(null)
 
+const ageType = ref<'GA' | 'Postnatal'>('Postnatal')
+const ageValue = ref<number | null>(null)
+const ageUnit = ref<'weeks' | 'months' | 'years'>('years')
+
 const doneCount   = computed(() => files.value.filter(f => f.status === 'done').length)
 const failedCount = computed(() => files.value.filter(f => f.status === 'failed').length)
 const queuedCount = computed(() => files.value.filter(f => f.status === 'queued').length)
-const selectedTotal = computed(() => selected.value?.volumes.reduce((s, v) => s + v.volume, 0) ?? 0)
 
 function addFiles(newFiles: FileList | File[]) {
   const existing = new Set(files.value.map(f => f.file.name))
@@ -262,8 +246,9 @@ async function runAll() {
 <style scoped>
 .batch-root {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: 400px 1fr;
   gap: 20px;
+  max-width: 1020px;
   align-items: start;
   min-height: calc(100vh - 68px - 64px);
 }
@@ -420,6 +405,34 @@ async function runAll() {
 .pct-bar { width: 80px; height: 4px; background: #f0ede8; border-radius: 999px; overflow: hidden; }
 .pct-fill { height: 100%; border-radius: 999px; opacity: 0.8; }
 .pct-num { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
+
+/* ── Age settings ── */
+.settings-card {
+  background: #ffffff;
+  border: 1px solid #e8e4dc;
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  box-shadow: 0 1px 4px rgba(28,25,23,0.04);
+}
+.settings-row { display: flex; align-items: center; gap: 10px; }
+.settings-label { font-size: 0.78rem; font-weight: 600; color: #78716c; min-width: 28px; }
+.age-inputs { display: flex; gap: 6px; flex: 1; }
+.form-sel {
+  font-size: 0.78rem; color: #57534e;
+  background: #faf9f6; border: 1px solid #e8e4dc;
+  border-radius: 7px; padding: 5px 7px;
+  cursor: pointer; flex: 1;
+}
+.age-inp {
+  font-size: 0.78rem; color: #57534e;
+  background: #faf9f6; border: 1px solid #e8e4dc;
+  border-radius: 7px; padding: 5px 7px;
+  width: 64px; flex-shrink: 0;
+}
+
+/* ── Right panel viewer size ── */
+.right-panel :deep(.viewer-container) { height: 370px; }
 
 /* ── Empty state ── */
 .empty-right {

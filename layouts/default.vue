@@ -59,7 +59,6 @@
               <path d="M3 5h14M3 10h14M3 15h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
             <span>Batch Processing</span>
-            <span class="soon-tag">Soon</span>
           </NuxtLink>
           <NuxtLink to="/map" class="nav-item" :class="{ active: route.path === '/map' }">
             <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
@@ -67,6 +66,16 @@
               <path d="M8 3v12M12 5v12" stroke="currentColor" stroke-width="1.5"/>
             </svg>
             <span>Usage Map</span>
+          </NuxtLink>
+        </nav>
+        <div class="sidebar-section sidebar-contact-hd">CONTACT</div>
+        <nav class="sidebar-nav">
+          <NuxtLink to="/contact" class="nav-item" :class="{ active: route.path === '/contact' }">
+            <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 7l8 5 8-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>Contact</span>
           </NuxtLink>
         </nav>
         <div class="sidebar-footer">
@@ -221,6 +230,7 @@ a { text-decoration: none; }
   padding: 2px 7px;
 }
 
+.sidebar-contact-hd { margin-top: 16px; }
 .sidebar-footer { margin-top: auto; padding: 0 6px; }
 .sidebar-divider { height: 1px; background: #e8e4dc; margin-bottom: 12px; }
 .sidebar-ver { font-size: 0.7rem; color: #c4bfb8; }
