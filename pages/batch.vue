@@ -107,6 +107,7 @@
                 <option value="Female">F</option>
                 <option value="Unknown">—</option>
               </select>
+              <span class="row-hint">(for growth curve · optional)</span>
             </div>
           </div>
         </div>
@@ -247,7 +248,7 @@ async function runAll() {
 <style scoped>
 .batch-root {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 440px minmax(0, 580px);
   gap: 20px;
   align-items: start;
   min-height: calc(100vh - 68px - 64px);
@@ -350,6 +351,7 @@ async function runAll() {
 }
 .age-val-sm:disabled { opacity: 0.45; cursor: not-allowed; }
 .row-meta-sep { font-size: 0.7rem; color: #d6d3cd; }
+.row-hint { font-size: 0.68rem; color: #c4bfb8; white-space: nowrap; }
 
 .badge-wrap { flex-shrink: 0; }
 .badge {
