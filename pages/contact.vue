@@ -23,8 +23,9 @@
 
 <script setup lang="ts">
 const contacts = [
-  { name: 'Dingyi Zhang', role: 'Lead Developer', email: 'dingyi.zhang@example.edu' },
-  { name: 'Research Team', role: 'General Inquiries', email: 'neurols@example.edu' },
+  { name: 'Author 1', role: 'First Author', email: 'author1@example.edu' },
+  { name: 'Author 2', role: 'Second Author', email: 'author2@example.edu' },
+  { name: 'Yun Wang', role: 'Principal Investigator', email: 'yun.wang2@emory.edu' },
 ]
 
 function initials(name: string) {

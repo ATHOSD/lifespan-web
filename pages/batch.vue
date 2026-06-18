@@ -8,25 +8,6 @@
         <p class="page-desc">Process multiple MRI scans sequentially</p>
       </div>
 
-      <!-- Age settings -->
-      <div class="settings-card">
-        <div class="settings-row">
-          <span class="settings-label">Age</span>
-          <div class="age-inputs">
-            <select v-model="ageType" class="form-sel">
-              <option value="GA">Gestational</option>
-              <option value="Postnatal">Postnatal</option>
-            </select>
-            <input v-model.number="ageValue" type="number" class="age-inp" placeholder="—" step="any" min="0" />
-            <select v-model="ageUnit" class="form-sel">
-              <option value="weeks">Weeks</option>
-              <option value="months">Months</option>
-              <option value="years">Years</option>
-            </select>
-          </div>
-        </div>
-      </div>
-
       <!-- Upload zone -->
       <div
         class="upload-zone"
@@ -87,31 +68,40 @@
             }"
             @click="f.status === 'done' && select(f)"
           >
-            <!-- Status badge -->
-            <div class="badge-wrap">
-              <span v-if="f.status === 'queued'"  class="badge badge-q">Queued</span>
-              <span v-if="f.status === 'running'" class="badge badge-r"><span class="badge-spin"/>Running</span>
-              <span v-if="f.status === 'done'"    class="badge badge-d">Done</span>
-              <span v-if="f.status === 'failed'"  class="badge badge-f">Failed</span>
+            <!-- Line 1: badge + name + modality + download -->
+            <div class="row-main">
+              <div class="badge-wrap">
+                <span v-if="f.status === 'queued'"  class="badge badge-q">Queued</span>
+                <span v-if="f.status === 'running'" class="badge badge-r"><span class="badge-spin"/>Running</span>
+                <span v-if="f.status === 'done'"    class="badge badge-d">Done</span>
+                <span v-if="f.status === 'failed'"  class="badge badge-f">Failed</span>
+              </div>
+              <div class="file-name-wrap">
+                <div class="file-name">{{ f.file.name }}</div>
+                <div v-if="f.error" class="file-err">{{ f.error }}</div>
+              </div>
+              <select v-model="f.modality" class="mod-sel" :disabled="f.status !== 'queued'" @click.stop>
+                <option>T1w</option><option>T2w</option><option>FA</option><option>MD</option>
+              </select>
+              <a v-if="f.segUrl" :href="f.segUrl" download="segmentation.nii.gz" class="row-dl" @click.stop title="Download mask">
+                <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
+                  <path d="M2 12h12v1.5H2V12zm5.25-3.44V2h1.5v6.56l2.47-2.47 1.06 1.06L8 11.39l-4.28-4.24 1.06-1.06 2.47 2.47z"/>
+                </svg>
+              </a>
             </div>
-
-            <!-- File name -->
-            <div class="file-name-wrap">
-              <div class="file-name">{{ f.file.name }}</div>
-              <div v-if="f.error" class="file-err">{{ f.error }}</div>
+            <!-- Line 2: age inputs -->
+            <div class="row-age" @click.stop>
+              <select v-model="f.ageType" class="age-sel-sm" :disabled="f.status !== 'queued'">
+                <option value="GA">GA</option>
+                <option value="Postnatal">PNA</option>
+              </select>
+              <input v-model.number="f.ageValue" type="number" class="age-val-sm" placeholder="Age" step="any" min="0" :disabled="f.status !== 'queued'" @click.stop />
+              <select v-model="f.ageUnit" class="age-sel-sm" :disabled="f.status !== 'queued'">
+                <option value="weeks">Wks</option>
+                <option value="months">Mos</option>
+                <option value="years">Yrs</option>
+              </select>
             </div>
-
-            <!-- Modality -->
-            <select v-model="f.modality" class="mod-sel" :disabled="f.status !== 'queued'" @click.stop>
-              <option>T1w</option><option>T2w</option><option>FA</option><option>MD</option>
-            </select>
-
-            <!-- Download -->
-            <a v-if="f.segUrl" :href="f.segUrl" download="segmentation.nii.gz" class="row-dl" @click.stop title="Download mask">
-              <svg viewBox="0 0 16 16" fill="currentColor" width="14" height="14">
-                <path d="M2 12h12v1.5H2V12zm5.25-3.44V2h1.5v6.56l2.47-2.47 1.06 1.06L8 11.39l-4.28-4.24 1.06-1.06 2.47 2.47z"/>
-              </svg>
-            </a>
           </div>
         </div>
       </div>
@@ -159,6 +149,9 @@ interface BatchFile {
   id: string
   file: File
   modality: string
+  ageType: 'GA' | 'Postnatal'
+  ageValue: number | null
+  ageUnit: 'weeks' | 'months' | 'years'
   status: 'queued' | 'running' | 'done' | 'failed'
   mriUrl: string
   segUrl: string | null
@@ -172,9 +165,6 @@ const files = ref<BatchFile[]>([])
 const running = ref(false)
 const selected = ref<BatchFile | null>(null)
 
-const ageType = ref<'GA' | 'Postnatal'>('Postnatal')
-const ageValue = ref<number | null>(null)
-const ageUnit = ref<'weeks' | 'months' | 'years'>('years')
 
 const doneCount   = computed(() => files.value.filter(f => f.status === 'done').length)
 const failedCount = computed(() => files.value.filter(f => f.status === 'failed').length)
@@ -188,6 +178,9 @@ function addFiles(newFiles: FileList | File[]) {
       id: crypto.randomUUID(),
       file,
       modality: 'T1w',
+      ageType: 'Postnatal',
+      ageValue: null,
+      ageUnit: 'years',
       status: 'queued',
       mriUrl: URL.createObjectURL(file),
       segUrl: null,
@@ -326,7 +319,7 @@ async function runAll() {
 /* ── File rows ── */
 .file-list { display: flex; flex-direction: column; }
 .file-row {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; flex-direction: column; gap: 6px;
   padding: 10px 16px;
   border-bottom: 1px solid #f0ede8;
   transition: background 0.12s;
@@ -335,6 +328,20 @@ async function runAll() {
 .row-done { cursor: pointer; }
 .row-done:hover { background: #faf9f6; }
 .row-selected { background: #f3f0ff !important; }
+.row-main { display: flex; align-items: center; gap: 8px; }
+.row-age { display: flex; align-items: center; gap: 5px; padding-left: 1px; }
+.age-sel-sm {
+  font-size: 0.72rem; color: #57534e;
+  background: #faf9f6; border: 1px solid #e8e4dc;
+  border-radius: 5px; padding: 3px 5px; cursor: pointer;
+}
+.age-sel-sm:disabled { opacity: 0.45; cursor: not-allowed; }
+.age-val-sm {
+  font-size: 0.72rem; color: #57534e;
+  background: #faf9f6; border: 1px solid #e8e4dc;
+  border-radius: 5px; padding: 3px 6px; width: 58px;
+}
+.age-val-sm:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .badge-wrap { flex-shrink: 0; }
 .badge {
@@ -405,31 +412,6 @@ async function runAll() {
 .pct-bar { width: 80px; height: 4px; background: #f0ede8; border-radius: 999px; overflow: hidden; }
 .pct-fill { height: 100%; border-radius: 999px; opacity: 0.8; }
 .pct-num { width: 40px; text-align: right; font-variant-numeric: tabular-nums; }
-
-/* ── Age settings ── */
-.settings-card {
-  background: #ffffff;
-  border: 1px solid #e8e4dc;
-  border-radius: 12px;
-  padding: 11px 14px;
-  margin-bottom: 14px;
-  box-shadow: 0 1px 4px rgba(28,25,23,0.04);
-}
-.settings-row { display: flex; align-items: center; gap: 10px; }
-.settings-label { font-size: 0.78rem; font-weight: 600; color: #78716c; min-width: 28px; }
-.age-inputs { display: flex; gap: 6px; flex: 1; }
-.form-sel {
-  font-size: 0.78rem; color: #57534e;
-  background: #faf9f6; border: 1px solid #e8e4dc;
-  border-radius: 7px; padding: 5px 7px;
-  cursor: pointer; flex: 1;
-}
-.age-inp {
-  font-size: 0.78rem; color: #57534e;
-  background: #faf9f6; border: 1px solid #e8e4dc;
-  border-radius: 7px; padding: 5px 7px;
-  width: 64px; flex-shrink: 0;
-}
 
 /* ── Right panel viewer size ── */
 .right-panel :deep(.viewer-container) { height: 370px; }
