@@ -50,10 +50,10 @@
         </div>
 
         <!-- Age -->
-        <div class="field-group span-2">
+        <div class="field-group">
           <label class="field-label">Age <span class="optional-tag">for growth curve · optional</span></label>
           <div class="age-row">
-            <select v-model="ageType" class="field-select" style="width:90px;flex-shrink:0">
+            <select v-model="ageType" class="field-select" style="width:112px;flex-shrink:0">
               <option value="GA">GA</option>
               <option value="Postnatal">Postnatal</option>
             </select>
@@ -62,7 +62,7 @@
               placeholder="—" class="field-input"
               @keydown="blockNonNumeric" @paste.prevent
             />
-            <select v-model="ageUnit" class="field-select" style="width:80px;flex-shrink:0">
+            <select v-model="ageUnit" class="field-select" style="width:96px;flex-shrink:0">
               <option value="weeks">Weeks</option>
               <option value="months">Months</option>
               <option value="years">Years</option>
@@ -270,7 +270,7 @@ async function runSegmentation() {
 
 .config-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: 140px auto 110px 1fr;
   gap: 20px;
   align-items: end;
 }
