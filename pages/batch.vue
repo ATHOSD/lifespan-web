@@ -248,7 +248,7 @@ async function runAll() {
 <style scoped>
 .batch-root {
   display: grid;
-  grid-template-columns: 440px minmax(0, 580px);
+  grid-template-columns: 440px 1fr;
   gap: 20px;
   align-items: start;
   min-height: calc(100vh - 68px - 64px);
@@ -395,6 +395,9 @@ async function runAll() {
   background: #ffffff; border: 1px solid #e8e4dc;
   border-radius: 16px; padding: 24px;
   box-shadow: 0 1px 4px rgba(28,25,23,0.05);
+  max-width: 600px;
+  margin-left: auto;
+  width: 100%;
 }
 .card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; gap: 12px; }
 .card-title { font-size: 1rem; font-weight: 600; color: #1c1917; }
