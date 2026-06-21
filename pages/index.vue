@@ -115,8 +115,6 @@
               <button class="btn-curve" :class="{ 'curve-added': addedToCurve }" @click="toggleCurve">
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
                   <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path v-if="!addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  <path v-else d="M10.5 2l2 2L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 {{ addedToCurve ? 'Added to Curve' : 'Add to Curve' }}
               </button>
@@ -151,7 +149,7 @@
               <tr v-for="v in volumes" :key="v.label">
                 <td>
                   <span class="label-dot" :style="{ background: COLORS[v.label - 1] ?? '#666' }" />
-                  Label {{ v.label }}
+                  {{ LABEL_NAMES[v.label] ?? `Label ${v.label}` }}
                 </td>
                 <td style="text-align:right;font-variant-numeric:tabular-nums">{{ v.volume.toLocaleString() }}</td>
                 <td>
@@ -179,6 +177,23 @@ const COLORS = [
   '#7ABADC','#EC0DB0','#0C30FF','#DCD814','#2ACCA4',
   '#FF8000','#67FFFF','#779FB0','#FFC8C8',
 ]
+
+const LABEL_NAMES: Record<number, string> = {
+  1: 'Ventricles',
+  2: 'Gray Matter',
+  3: 'White Matter',
+  4: 'Hippocampus',
+  5: 'Amygdala',
+  6: 'Caudate',
+  7: 'Putamen',
+  8: 'Pallidum',
+  9: 'Thalamus',
+  10: 'Accumbens',
+  11: 'Cerebellar Cortex',
+  12: 'Cerebellar WM',
+  13: 'Brainstem',
+  14: 'Ventral Diencephalon',
+}
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const file = ref<File | null>(null)
@@ -406,13 +421,13 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
 
 .btn-curve {
   display: inline-flex; align-items: center; gap: 6px;
-  background: #f3f0ff; border: 1px solid #ddd6fe; color: #7c3aed;
+  background: #fffbeb; border: 1px solid #fde68a; color: #d97706;
   border-radius: 8px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600;
   cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
 }
-.btn-curve:hover { background: #ede9fe; }
-.btn-curve.curve-added { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
-.btn-curve.curve-added:hover { background: #dcfce7; }
+.btn-curve:hover { background: #fef3c7; }
+.btn-curve.curve-added { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
+.btn-curve.curve-added:hover { background: #fee2e2; }
 
 .btn-dl {
   display: inline-flex; align-items: center; gap: 6px;

@@ -12,8 +12,8 @@
           <option v-for="m in MEASURES" :key="m" :value="m">{{ MEASURE_LABELS[m] }}</option>
         </select>
         <div class="sex-btns">
-          <button :class="['sex-btn', { active: showMale }]" @click="showMale = !showMale">♂ Male</button>
-          <button :class="['sex-btn', { active: showFemale }]" @click="showFemale = !showFemale">♀ Female</button>
+          <button :class="['sex-btn', { active: selectedSex === 'Male' }]" @click="selectedSex = 'Male'">♂ Male</button>
+          <button :class="['sex-btn', { active: selectedSex === 'Female' }]" @click="selectedSex = 'Female'">♀ Female</button>
         </div>
       </div>
     </div>
@@ -117,8 +117,7 @@ const AGE_TICKS = {
 const { subjects, removeSubject } = useCurveStore()
 
 const selectedMeasure = ref('GMV')
-const showMale = ref(true)
-const showFemale = ref(true)
+const selectedSex = ref<'Male' | 'Female'>('Male')
 const hoveredId = ref<string | null>(null)
 const chartEl = ref<HTMLDivElement | null>(null)
 const volRef = ref<any>(null)
@@ -176,10 +175,11 @@ function drawChart() {
   if (!Plotly || !chartEl.value || !volRef.value) return
 
   const traces: any[] = []
-  if (showMale.value)   traces.push(...buildBandTraces('Male',   124, 58,  237))
-  if (showFemale.value) traces.push(...buildBandTraces('Female', 236, 72,  153))
+  if (selectedSex.value === 'Male')   traces.push(...buildBandTraces('Male',   124, 58,  237))
+  if (selectedSex.value === 'Female') traces.push(...buildBandTraces('Female', 236, 72,  153))
 
   for (const s of subjects.value) {
+    if (s.sex !== 'Unknown' && s.sex !== selectedSex.value) continue
     const vol = getVolume(s, selectedMeasure.value)
     if (vol === null || s.postConceptionDays === null) continue
     traces.push({
@@ -243,7 +243,7 @@ onMounted(async () => {
   drawChart()
 })
 
-watch([selectedMeasure, showMale, showFemale, subjects], () => {
+watch([selectedMeasure, selectedSex, subjects], () => {
   drawChart()
 }, { deep: true })
 </script>

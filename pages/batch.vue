@@ -87,8 +87,6 @@
               <button v-if="f.segUrl" class="row-icon-btn" :class="{ 'icon-active': f.addedToCurve }" @click.stop="toggleCurve(f)" :title="f.addedToCurve ? 'Remove from curve' : 'Add to growth curve'">
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
                   <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <path v-if="!f.addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                  <path v-else d="M10.5 2l2 2L15 1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
               </button>
               <!-- Download -->
@@ -148,6 +146,42 @@
           <MriViewer :key="selected.id" :mri-url="selected.mriUrl" :seg-url="selected.segUrl" :multiplanar-layout="2" @volumes="onVolumes" />
         </div>
 
+        <!-- Volumes table -->
+        <div v-if="selected.volumes.length" class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Tissue Volumes</h2>
+              <p class="card-sub">{{ selected.volumes.length }} regions · {{ (selectedTotalVolume / 1000).toFixed(0) }} cm³ total labeled</p>
+            </div>
+          </div>
+          <table class="vol-table">
+            <thead>
+              <tr>
+                <th>Region</th>
+                <th style="text-align:right">Volume (mm³)</th>
+                <th style="text-align:right">% Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="v in selected.volumes" :key="v.label">
+                <td>
+                  <span class="label-dot" :style="{ background: COLORS[v.label - 1] ?? '#666' }" />
+                  {{ LABEL_NAMES[v.label] ?? `Label ${v.label}` }}
+                </td>
+                <td style="text-align:right;font-variant-numeric:tabular-nums">{{ v.volume.toLocaleString() }}</td>
+                <td>
+                  <div class="pct-cell">
+                    <div class="pct-bar">
+                      <div class="pct-fill" :style="{ width: ((v.volume / selectedTotalVolume) * 100).toFixed(1) + '%', background: COLORS[v.label - 1] ?? '#666' }" />
+                    </div>
+                    <span class="pct-num">{{ ((v.volume / selectedTotalVolume) * 100).toFixed(1) }}%</span>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
       </template>
 
       <div v-else class="empty-right">
@@ -167,6 +201,29 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
+
+const COLORS = [
+  '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
+  '#7ABADC','#EC0DB0','#0C30FF','#DCD814','#2ACCA4',
+  '#FF8000','#67FFFF','#779FB0','#FFC8C8',
+]
+
+const LABEL_NAMES: Record<number, string> = {
+  1: 'Ventricles',
+  2: 'Gray Matter',
+  3: 'White Matter',
+  4: 'Hippocampus',
+  5: 'Amygdala',
+  6: 'Caudate',
+  7: 'Putamen',
+  8: 'Pallidum',
+  9: 'Thalamus',
+  10: 'Accumbens',
+  11: 'Cerebellar Cortex',
+  12: 'Cerebellar WM',
+  13: 'Brainstem',
+  14: 'Ventral Diencephalon',
+}
 
 interface BatchFile {
   id: string
@@ -192,6 +249,10 @@ const files = ref<BatchFile[]>([])
 const running = ref(false)
 const selected = ref<BatchFile | null>(null)
 
+
+const selectedTotalVolume = computed(() =>
+  selected.value?.volumes.reduce((s, v) => s + v.volume, 0) ?? 0
+)
 
 const doneCount   = computed(() => files.value.filter(f => f.status === 'done').length)
 const failedCount = computed(() => files.value.filter(f => f.status === 'failed').length)
@@ -426,12 +487,12 @@ async function runAll() {
 .row-icon-btn {
   display: flex; align-items: center; justify-content: center;
   width: 28px; height: 28px; border-radius: 6px;
-  background: #f3f0ff; border: 1px solid #ddd6fe; color: #7c3aed;
+  background: #fffbeb; border: 1px solid #fde68a; color: #d97706;
   flex-shrink: 0; cursor: pointer; transition: all 0.15s;
 }
-.row-icon-btn:hover { background: #ede9fe; }
-.row-icon-btn.icon-active { background: #f0fdf4; border-color: #bbf7d0; color: #16a34a; }
-.row-icon-btn.icon-active:hover { background: #dcfce7; }
+.row-icon-btn:hover { background: #fef3c7; }
+.row-icon-btn.icon-active { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
+.row-icon-btn.icon-active:hover { background: #fee2e2; }
 
 .row-dl {
   display: flex; align-items: center; justify-content: center;
