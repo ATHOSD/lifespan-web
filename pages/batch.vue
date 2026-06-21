@@ -201,6 +201,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
+import { useToast } from '~/composables/useToast'
 
 const COLORS = [
   '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
@@ -241,7 +242,8 @@ interface BatchFile {
   error: string | null
 }
 
-const { addSubject, removeSubject } = useCurveStore()
+const { addSubject, removeSubject, hasSubject, updateVolumes } = useCurveStore()
+const { show: showToast } = useToast()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
@@ -296,7 +298,10 @@ function select(f: BatchFile) {
 }
 
 function onVolumes(data: { label: number; volume: number }[]) {
-  if (selected.value) selected.value.volumes = data
+  if (selected.value) {
+    selected.value.volumes = data
+    if (hasSubject(selected.value.id)) updateVolumes(selected.value.id, data)
+  }
 }
 
 function toggleCurve(f: BatchFile) {
@@ -310,9 +315,11 @@ function toggleCurve(f: BatchFile) {
       volumes: f.volumes,
     })
     f.addedToCurve = true
+    showToast('Added to Growth Curve')
   } else {
     removeSubject(f.id)
     f.addedToCurve = false
+    showToast('Removed from Growth Curve')
   }
 }
 
@@ -491,8 +498,8 @@ async function runAll() {
   flex-shrink: 0; cursor: pointer; transition: all 0.15s;
 }
 .row-icon-btn:hover { background: #fef3c7; }
-.row-icon-btn.icon-active { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
-.row-icon-btn.icon-active:hover { background: #fee2e2; }
+.row-icon-btn.icon-active { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.row-icon-btn.icon-active:hover { background: #dbeafe; }
 
 .row-dl {
   display: flex; align-items: center; justify-content: center;

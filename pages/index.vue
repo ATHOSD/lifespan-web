@@ -171,6 +171,7 @@
 
 <script setup lang="ts">
 import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
+import { useToast } from '~/composables/useToast'
 
 const COLORS = [
   '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
@@ -211,12 +212,14 @@ const volumes = ref<{ label: number; volume: number }[]>([])
 const addedToCurve = ref(false)
 const curveSubjectId = ref<string | null>(null)
 
-const { addSubject, removeSubject } = useCurveStore()
+const { addSubject, removeSubject, updateVolumes } = useCurveStore()
+const { show: showToast } = useToast()
 
 const totalVolume = computed(() => volumes.value.reduce((s, v) => s + v.volume, 0))
 
 function onVolumes(data: { label: number; volume: number }[]) {
   volumes.value = data
+  if (curveSubjectId.value) updateVolumes(curveSubjectId.value, data)
 }
 
 function blockNonNumeric(e: KeyboardEvent) {
@@ -270,10 +273,12 @@ function toggleCurve() {
       volumes: volumes.value,
     })
     addedToCurve.value = true
+    showToast('Added to Growth Curve')
   } else {
     if (curveSubjectId.value) removeSubject(curveSubjectId.value)
     curveSubjectId.value = null
     addedToCurve.value = false
+    showToast('Removed from Growth Curve')
   }
 }
 
@@ -426,8 +431,8 @@ input[type="number"]::-webkit-inner-spin-button { opacity: 1; }
   cursor: pointer; white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
 }
 .btn-curve:hover { background: #fef3c7; }
-.btn-curve.curve-added { background: #fef2f2; border-color: #fca5a5; color: #ef4444; }
-.btn-curve.curve-added:hover { background: #fee2e2; }
+.btn-curve.curve-added { background: #eff6ff; border-color: #bfdbfe; color: #2563eb; }
+.btn-curve.curve-added:hover { background: #dbeafe; }
 
 .btn-dl {
   display: inline-flex; align-items: center; gap: 6px;

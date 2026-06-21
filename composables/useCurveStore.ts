@@ -56,5 +56,10 @@ export const useCurveStore = () => {
     return subjects.value.some(s => s.id === id)
   }
 
-  return { subjects, addSubject, removeSubject, hasSubject }
+  function updateVolumes(id: string, volumes: { label: number; volume: number }[]) {
+    const subj = subjects.value.find(s => s.id === id)
+    if (subj) subj.volumes = volumes
+  }
+
+  return { subjects, addSubject, removeSubject, hasSubject, updateVolumes }
 }

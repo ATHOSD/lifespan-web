@@ -24,6 +24,11 @@
       </div>
     </Transition>
 
+    <!-- Toast -->
+    <Transition name="toast">
+      <div v-if="toastMessage" class="toast">{{ toastMessage }}</div>
+    </Transition>
+
     <!-- Navbar -->
     <header class="navbar">
       <div class="brand">
@@ -101,6 +106,7 @@
 <script setup lang="ts">
 const route = useRoute()
 const showDisclaimer = ref(false)
+const { message: toastMessage } = useToast()
 
 onMounted(() => {
   if (!sessionStorage.getItem('disclaimer-accepted')) {
@@ -307,4 +313,24 @@ a { text-decoration: none; }
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
+
+.toast {
+  position: fixed;
+  top: 82px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  background: #1c1917;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  letter-spacing: 0.01em;
+}
+.toast-enter-active, .toast-leave-active { transition: opacity 0.22s ease, transform 0.22s ease; }
+.toast-enter-from, .toast-leave-to { opacity: 0; transform: translateX(-50%) translateY(-10px); }
 </style>
