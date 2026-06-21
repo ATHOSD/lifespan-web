@@ -84,7 +84,7 @@
                 <option>T1w</option><option>T2w</option><option>FA</option><option>MD</option>
               </select>
               <!-- Add to curve -->
-              <button v-if="f.segUrl" class="row-icon-btn" :class="{ 'icon-active': f.addedToCurve }" @click.stop="f.addedToCurve = !f.addedToCurve" :title="f.addedToCurve ? 'Remove from curve' : 'Add to growth curve'">
+              <button v-if="f.segUrl" class="row-icon-btn" :class="{ 'icon-active': f.addedToCurve }" @click.stop="toggleCurve(f)" :title="f.addedToCurve ? 'Remove from curve' : 'Add to growth curve'">
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
                   <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <path v-if="!f.addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -166,6 +166,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
 
 interface BatchFile {
   id: string
@@ -182,6 +183,8 @@ interface BatchFile {
   volumes: { label: number; volume: number }[]
   error: string | null
 }
+
+const { addSubject, removeSubject } = useCurveStore()
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
@@ -235,7 +238,25 @@ function onVolumes(data: { label: number; volume: number }[]) {
   if (selected.value) selected.value.volumes = data
 }
 
+function toggleCurve(f: BatchFile) {
+  if (!f.addedToCurve) {
+    addSubject({
+      id: f.id,
+      name: f.file.name,
+      sex: f.sex === 'Unknown' ? 'Unknown' : f.sex as 'Male' | 'Female',
+      postConceptionDays: computePCD(f.ageType, f.ageValue, f.ageUnit),
+      ageLabel: formatAgeLabel(f.ageType, f.ageValue, f.ageUnit),
+      volumes: f.volumes,
+    })
+    f.addedToCurve = true
+  } else {
+    removeSubject(f.id)
+    f.addedToCurve = false
+  }
+}
+
 function deleteFile(f: BatchFile) {
+  if (f.addedToCurve) removeSubject(f.id)
   if (selected.value?.id === f.id) selected.value = null
   files.value = files.value.filter(item => item.id !== f.id)
 }

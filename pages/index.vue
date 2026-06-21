@@ -112,7 +112,7 @@
               <p class="card-sub">Hover to inspect tissue labels · scroll to zoom</p>
             </div>
             <div class="header-actions">
-              <button class="btn-curve" :class="{ 'curve-added': addedToCurve }" @click="addedToCurve = !addedToCurve">
+              <button class="btn-curve" :class="{ 'curve-added': addedToCurve }" @click="toggleCurve">
                 <svg viewBox="0 0 16 16" fill="none" width="13" height="13">
                   <path d="M1 12L4.5 8l3 2.5L11 5l3.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                   <path v-if="!addedToCurve" d="M13 0.5v4M11 2.5h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
@@ -172,6 +172,8 @@
 </template>
 
 <script setup lang="ts">
+import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
+
 const COLORS = [
   '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
   '#7ABADC','#EC0DB0','#0C30FF','#DCD814','#2ACCA4',
@@ -192,6 +194,9 @@ const mriUrl = ref<string | null>(null)
 const segUrl = ref<string | null>(null)
 const volumes = ref<{ label: number; volume: number }[]>([])
 const addedToCurve = ref(false)
+const curveSubjectId = ref<string | null>(null)
+
+const { addSubject, removeSubject } = useCurveStore()
 
 const totalVolume = computed(() => volumes.value.reduce((s, v) => s + v.volume, 0))
 
@@ -211,6 +216,11 @@ function setFile(f: File) {
   segUrl.value = null
   volumes.value = []
   error.value = ''
+  if (curveSubjectId.value) {
+    removeSubject(curveSubjectId.value)
+    curveSubjectId.value = null
+  }
+  addedToCurve.value = false
 }
 
 function onFileChange(e: Event) {
@@ -222,6 +232,34 @@ function onDrop(e: DragEvent) {
   isDragging.value = false
   const f = e.dataTransfer?.files?.[0]
   if (f) setFile(f)
+}
+
+function toggleCurve() {
+  if (!addedToCurve.value) {
+    const id = `single-${Date.now()}`
+    curveSubjectId.value = id
+    addSubject({
+      id,
+      name: file.value?.name ?? 'Unknown',
+      sex: sex.value === 'M' ? 'Male' : sex.value === 'F' ? 'Female' : 'Unknown',
+      postConceptionDays: computePCD(
+        ageType.value as 'GA' | 'Postnatal',
+        ageValue.value,
+        ageUnit.value as 'weeks' | 'months' | 'years',
+      ),
+      ageLabel: formatAgeLabel(
+        ageType.value as 'GA' | 'Postnatal',
+        ageValue.value,
+        ageUnit.value as 'weeks' | 'months' | 'years',
+      ),
+      volumes: volumes.value,
+    })
+    addedToCurve.value = true
+  } else {
+    if (curveSubjectId.value) removeSubject(curveSubjectId.value)
+    curveSubjectId.value = null
+    addedToCurve.value = false
+  }
 }
 
 async function runSegmentation() {
