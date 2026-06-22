@@ -2,7 +2,7 @@
   <div class="viewer-container">
     <canvas ref="canvas" />
     <div v-if="hoverLabel !== null" class="label-badge">
-      Label {{ hoverLabel }}
+      {{ LABEL_NAMES[hoverLabel] ?? `Label ${hoverLabel}` }}
     </div>
   </div>
 </template>
@@ -19,6 +19,14 @@ const props = defineProps<{
 const emit = defineEmits<{
   volumes: [data: { label: number; volume: number }[]]
 }>()
+
+const LABEL_NAMES: Record<number, string> = {
+  1: 'Ventricles', 2: 'Gray Matter', 3: 'White Matter',
+  4: 'Hippocampus', 5: 'Amygdala', 6: 'Caudate', 7: 'Putamen',
+  8: 'Pallidum', 9: 'Thalamus', 10: 'Accumbens',
+  11: 'Cerebellar Cortex', 12: 'Cerebellar WM',
+  13: 'Brainstem', 14: 'Ventral Diencephalon',
+}
 
 const canvas = ref<HTMLCanvasElement | null>(null)
 const hoverLabel = ref<number | null>(null)
