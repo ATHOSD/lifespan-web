@@ -28,47 +28,49 @@ export function parseFilename(filename: string): ParsedMeta {
     }
   }
 
-  // Age: single-token patterns
-  for (const tok of tokens) {
+  // Age: match directly on the base string (not tokens) so decimal numbers like 37.43 work.
+  // The tokenizer splits on '.', which would break "GA37.43wk" into "GA37" and "43wksub".
+  // Boundary before: not a letter or digit. After GA patterns: not a digit (allows "sub" to follow).
+  // After postnatal patterns: not a letter or digit.
+  {
     let m: RegExpMatchArray | null
-    // GA: explicit marker — 28wGA, 28wksGA, 28weeksGA, 28GA
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?GA|GA)$/i))) {
-      result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
+    // GA prefix: GA37.43, GA37.43wk, GA37.43wks, GA37.43weeks
+    if ((m = base.match(/(?<![A-Za-z0-9])GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?(?![0-9])/i))) {
+      result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
     }
-    // GA: GA28, GA28w, GA28wk, GA28wks, GA28weeks
-    if ((m = tok.match(/^GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?$/i))) {
-      result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
+    // GA suffix: 37.43GA, 37.43wGA, 37.43wksGA
+    else if ((m = base.match(/(?<![A-Za-z0-9])(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?GA(?![A-Za-z0-9])/i))) {
+      result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
     }
-    // Postnatal weeks: 28w, 28wk, 28wks, 28week, 28weeks (no GA marker)
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)w(?:ks?|eeks?)?$/i))) {
-      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
+    // Postnatal weeks: 5.2w, 5.2wk, 5.2wks, 5.2weeks (no GA marker)
+    else if ((m = base.match(/(?<![A-Za-z0-9])(\d+(?:\.\d+)?)w(?:ks?|eeks?)?(?![A-Za-z0-9])/i))) {
+      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
     }
-    // Postnatal years: 5y, 5yr, 5.5years
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)y(?:r|rs|ears?)?$/i))) {
-      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'; break
+    // Postnatal years: 5.5y, 5.5yr, 5.5years
+    else if ((m = base.match(/(?<![A-Za-z0-9])(\d+(?:\.\d+)?)y(?:r|rs|ears?)?(?![A-Za-z0-9])/i))) {
+      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'
     }
-    // Postnatal months: 6mo, 6mon, 6months
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?$/i))) {
-      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'months'; break
+    // Postnatal months: 6.5mo, 6.5months
+    else if ((m = base.match(/(?<![A-Za-z0-9])(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?(?![A-Za-z0-9])/i))) {
+      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'months'
     }
   }
 
-  // Age: "age" keyword + next token (BIDS-style: age-28w, age-5y)
+  // "age" keyword prefix (BIDS-style: age-37.43wk, age-5.5y) — only if not already found
   if (result.ageValue === undefined) {
-    for (let i = 0; i < tokens.length - 1; i++) {
-      if (!/^age$/i.test(tokens[i])) continue
-      const next = tokens[i + 1]
+    const keyMatch = base.match(/(?<![A-Za-z])age[^A-Za-z0-9]*/i)
+    if (keyMatch) {
+      const rest = base.slice(keyMatch.index! + keyMatch[0].length)
       let m: RegExpMatchArray | null
-      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?GA|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?$/i))) {
+      if ((m = rest.match(/^GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?/i)) || (m = rest.match(/^(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?GA/i))) {
         result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
-      } else if ((m = next.match(/^(\d+(?:\.\d+)?)w(?:ks?|eeks?)?$/i))) {
+      } else if ((m = rest.match(/^(\d+(?:\.\d+)?)w(?:ks?|eeks?)?/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
-      } else if ((m = next.match(/^(\d+(?:\.\d+)?)y(?:r|rs?)?$/i))) {
+      } else if ((m = rest.match(/^(\d+(?:\.\d+)?)y(?:r|rs|ears?)?/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'
-      } else if ((m = next.match(/^(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?$/i))) {
+      } else if ((m = rest.match(/^(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'months'
       }
-      break
     }
   }
 
