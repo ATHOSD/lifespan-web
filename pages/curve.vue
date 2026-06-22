@@ -50,7 +50,6 @@
             <div class="subj-name">{{ s.name }}</div>
             <div class="subj-meta">{{ s.ageLabel }} · {{ s.sex }}</div>
             <div v-if="subjectStatus(s) === 'wrong-sex'" class="subj-hidden-reason">not on {{ selectedSex }} chart</div>
-            <div v-else-if="subjectStatus(s) === 'no-data'" class="subj-hidden-reason">no volume data</div>
           </div>
           <button class="subj-remove" @click="removeSubject(s.id)" title="Remove">
             <svg viewBox="0 0 14 14" fill="none" width="11" height="11">
