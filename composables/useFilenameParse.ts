@@ -13,6 +13,7 @@ const MODALITY_PATTERNS: [string, RegExp][] = [
   ['MD',  /^MD$/i],
 ]
 
+// Parse modality, age, and sex from an MRI filename
 export function parseFilename(filename: string): ParsedMeta {
   // Strip extensions (.nii.gz, .nii, etc.)
   const base = filename.replace(/(?:\.[a-zA-Z0-9]+)+$/, '')
