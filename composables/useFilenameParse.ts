@@ -38,8 +38,8 @@ export function parseFilename(filename: string): ParsedMeta {
     if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:w(?:GA|wk)?|GA)$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
-    // GA: GA28
-    if ((m = tok.match(/^GA(\d+(?:\.\d+)?)$/i))) {
+    // GA: GA28, GA28wk, GA28w
+    if ((m = tok.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
     // Postnatal years: 5y, 5yr, 5.5years
@@ -58,7 +58,7 @@ export function parseFilename(filename: string): ParsedMeta {
       if (!/^age$/i.test(tokens[i])) continue
       const next = tokens[i + 1]
       let m: RegExpMatchArray | null
-      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:w(?:GA|wk)?|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)$/i))) {
+      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:w(?:GA|wk)?|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
         result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
       } else if ((m = next.match(/^(\d+(?:\.\d+)?)y(?:r|rs?)?$/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'
