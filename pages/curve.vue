@@ -41,14 +41,16 @@
         <div
           v-for="s in subjects" :key="s.id"
           class="subject-item"
-          :class="{ highlighted: hoveredId === s.id }"
+          :class="{ highlighted: hoveredId === s.id, 'item-hidden': subjectStatus(s) !== 'visible' }"
           @mouseenter="hoveredId = s.id"
           @mouseleave="hoveredId = null"
         >
-          <div class="subj-dot" :style="{ background: s.color }" />
+          <div class="subj-dot" :style="{ background: subjectStatus(s) === 'visible' ? s.color : '#d6d3cd' }" />
           <div class="subj-info">
             <div class="subj-name">{{ s.name }}</div>
             <div class="subj-meta">{{ s.ageLabel }} · {{ s.sex }}</div>
+            <div v-if="subjectStatus(s) === 'wrong-sex'" class="subj-hidden-reason">not on {{ selectedSex }} chart</div>
+            <div v-else-if="subjectStatus(s) === 'no-data'" class="subj-hidden-reason">no volume data</div>
           </div>
           <button class="subj-remove" @click="removeSubject(s.id)" title="Remove">
             <svg viewBox="0 0 14 14" fill="none" width="11" height="11">
@@ -129,6 +131,12 @@ const noVolumeData = computed(() =>
   subjects.value.every(s => getVolume(s, selectedMeasure.value) === null),
 )
 
+function subjectStatus(s: CurveSubject): 'visible' | 'wrong-sex' | 'no-data' {
+  if (s.sex !== 'Unknown' && s.sex !== selectedSex.value) return 'wrong-sex'
+  if (s.postConceptionDays === null || getVolume(s, selectedMeasure.value) === null) return 'no-data'
+  return 'visible'
+}
+
 function getVolume(s: CurveSubject, measure: string): number | null {
   const lbl = (n: number) => s.volumes.find(v => v.label === n)?.volume ?? null
   switch (measure) {
@@ -172,17 +180,27 @@ function pcdToAgeLabel(pcd: number): string {
 function buildBandTraces(sexKey: string, r: number, g: number, b: number) {
   const d = volRef.value?.[selectedMeasure.value]?.[sexKey]
   if (!d) return []
+
+  // Clip data to MAX_PCD so the curve never extends beyond 85y
+  const idx = (d.pcd as number[]).reduce((acc: number[], v, i) => { if (v <= MAX_PCD) acc.push(i); return acc }, [])
+  const pcd  = idx.map((i: number) => d.pcd[i])
+  const c005 = idx.map((i: number) => d.c005[i])
+  const c025 = idx.map((i: number) => d.c025[i])
+  const c500 = idx.map((i: number) => d.c500[i])
+  const c975 = idx.map((i: number) => d.c975[i])
+  const c995 = idx.map((i: number) => d.c995[i])
+  const ageLabels = pcd.map(pcdToAgeLabel)
+
   const fill1 = `rgba(${r},${g},${b},0.08)`
   const fill2 = `rgba(${r},${g},${b},0.15)`
   const line  = `rgba(${r},${g},${b},0.65)`
-  const ageLabels: string[] = d.pcd.map(pcdToAgeLabel)
   return [
-    { x: d.pcd, y: d.c005, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip' },
-    { x: d.pcd, y: d.c995, mode: 'lines', fill: 'tonexty', fillcolor: fill1, line: { color: 'transparent' }, name: `${sexKey} 0.5–99.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
-    { x: d.pcd, y: d.c025, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip', legendgroup: sexKey },
-    { x: d.pcd, y: d.c975, mode: 'lines', fill: 'tonexty', fillcolor: fill2, line: { color: 'transparent' }, name: `${sexKey} 2.5–97.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
+    { x: pcd, y: c005, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip' },
+    { x: pcd, y: c995, mode: 'lines', fill: 'tonexty', fillcolor: fill1, line: { color: 'transparent' }, name: `${sexKey} 0.5–99.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
+    { x: pcd, y: c025, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip', legendgroup: sexKey },
+    { x: pcd, y: c975, mode: 'lines', fill: 'tonexty', fillcolor: fill2, line: { color: 'transparent' }, name: `${sexKey} 2.5–97.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
     {
-      x: d.pcd, y: d.c500, mode: 'lines',
+      x: pcd, y: c500, mode: 'lines',
       line: { color: line, width: 1.5 },
       name: `${sexKey} 50th`, legendgroup: sexKey,
       customdata: ageLabels,
@@ -225,6 +243,7 @@ function drawChart() {
       tickvals: AGE_TICKS.vals,
       ticktext: AGE_TICKS.texts,
       range: [Math.log10(147), Math.log10(MAX_PCD)],
+      autorange: false,
       showgrid: true, gridcolor: '#f0ede8',
       linecolor: '#e8e4dc', tickfont: { size: 11 },
       tickangle: -30,
@@ -357,6 +376,8 @@ watch([selectedMeasure, selectedSex, subjects], () => {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .subj-meta { font-size: 0.72rem; color: #a8a29e; margin-top: 1px; }
+.subj-hidden-reason { font-size: 0.68rem; color: #c4bfb8; margin-top: 1px; font-style: italic; }
+.item-hidden { opacity: 0.55; }
 
 .subj-remove {
   display: flex; align-items: center; justify-content: center;
