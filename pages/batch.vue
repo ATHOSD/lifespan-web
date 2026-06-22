@@ -246,7 +246,7 @@ interface BatchFile {
 const { addSubject, removeSubject, hasSubject, updateVolumes } = useCurveStore()
 const { show: showToast } = useToast()
 
-const pendingCurveId = ref<string | null>(null)
+const pendingCurveQueue = ref<string[]>([])
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
@@ -318,19 +318,25 @@ function onVolumes(data: { label: number; volume: number }[]) {
   if (!selected.value) return
   selected.value.volumes = data
   if (hasSubject(selected.value.id)) updateVolumes(selected.value.id, data)
-  // Complete a pending "Add to Curve" that was waiting for volumes
-  if (pendingCurveId.value === selected.value.id) {
-    pendingCurveId.value = null
+  // If this file was pending, add it and process next in queue
+  const idx = pendingCurveQueue.value.indexOf(selected.value.id)
+  if (idx !== -1) {
+    pendingCurveQueue.value.splice(idx, 1)
     addSubjectFromFile(selected.value)
+    // Select next pending file so MriViewer loads its volumes
+    if (pendingCurveQueue.value.length > 0) {
+      const next = files.value.find(f => f.id === pendingCurveQueue.value[0])
+      if (next) selected.value = next
+    }
   }
 }
 
 function toggleCurve(f: BatchFile) {
   if (!f.addedToCurve) {
     if (f.volumes.length === 0) {
-      // Volumes not loaded yet — select file to trigger MriViewer, then add once onVolumes fires
-      selected.value = f
-      pendingCurveId.value = f.id
+      pendingCurveQueue.value.push(f.id)
+      // Start loading immediately if this is the only item in queue
+      if (pendingCurveQueue.value.length === 1) selected.value = f
       showToast('Loading volumes…')
     } else {
       addSubjectFromFile(f)
@@ -338,7 +344,7 @@ function toggleCurve(f: BatchFile) {
   } else {
     removeSubject(f.id)
     f.addedToCurve = false
-    pendingCurveId.value = null
+    pendingCurveQueue.value = pendingCurveQueue.value.filter(id => id !== f.id)
     showToast('Removed from Growth Curve')
   }
 }
