@@ -1,5 +1,10 @@
 export default defineNuxtConfig({
   ssr: false,
+  app: {
+    head: {
+      link: [{ rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+    },
+  },
   modules: ['@nuxt/ui'],
   runtimeConfig: {
     replicateApiToken: process.env.REPLICATE_API_TOKEN,
