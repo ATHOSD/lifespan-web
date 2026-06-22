@@ -166,7 +166,7 @@ function buildBandTraces(sexKey: string, r: number, g: number, b: number) {
     { x: d.pcd, y: d.c005, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip' },
     { x: d.pcd, y: d.c995, mode: 'lines', fill: 'tonexty', fillcolor: fill1, line: { color: 'transparent' }, name: `${sexKey} 0.5–99.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
     { x: d.pcd, y: d.c025, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip', legendgroup: sexKey },
-    { x: d.pcd, y: d.c975, mode: 'lines', fill: 'tonexty', fillcolor: fill2, line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip', legendgroup: sexKey },
+    { x: d.pcd, y: d.c975, mode: 'lines', fill: 'tonexty', fillcolor: fill2, line: { color: 'transparent' }, name: `${sexKey} 2.5–97.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
     { x: d.pcd, y: d.c500, mode: 'lines', line: { color: line, width: 1.5 }, name: `${sexKey} 50th`, legendgroup: sexKey },
   ]
 }
