@@ -109,9 +109,11 @@ const MEASURE_LABELS: Record<string, string> = {
 // 6=Caudate, 7=Putamen, 8=Pallidum, 9=Thalamus, 10=Accumbens,
 // 11=CBM_Cortex, 12=CBM_WM, 13=Brainstem, 14=Ventral_DC
 
+const MAX_PCD = 280 + 90 * 365.25  // 90 years postnatal
+
 const AGE_TICKS = {
-  vals:  [147, 196, 245, 280, 395, 645, 1825, 3650, 7300, 14600, 25550, 34310],
-  texts: ['21w GA', '28w GA', '35w GA', 'Birth', '4m', '1y', '5y', '10y', '20y', '40y', '70y', '95y'],
+  vals:  [147, 196, 245, 280, 395, 645, 1825, 3650, 7300, 14600, 25550, Math.round(MAX_PCD)],
+  texts: ['21w GA', '28w GA', '35w GA', 'Birth', '4m', '1y', '5y', '10y', '20y', '40y', '70y', '90y'],
 }
 
 const { subjects, removeSubject } = useCurveStore()
@@ -221,6 +223,7 @@ function drawChart() {
       type: 'log',
       tickvals: AGE_TICKS.vals,
       ticktext: AGE_TICKS.texts,
+      range: [Math.log10(147), Math.log10(MAX_PCD)],
       showgrid: true, gridcolor: '#f0ede8',
       linecolor: '#e8e4dc', tickfont: { size: 11 },
       tickangle: -30,
