@@ -246,6 +246,8 @@ interface BatchFile {
 const { addSubject, removeSubject, hasSubject, updateVolumes } = useCurveStore()
 const { show: showToast } = useToast()
 
+const pendingCurveId = ref<string | null>(null)
+
 const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const files = ref<BatchFile[]>([])
@@ -299,30 +301,44 @@ function select(f: BatchFile) {
   selected.value = f
 }
 
+function addSubjectFromFile(f: BatchFile) {
+  addSubject({
+    id: f.id,
+    name: f.file.name,
+    sex: f.sex === 'Unknown' ? 'Unknown' : f.sex as 'Male' | 'Female',
+    postConceptionDays: computePCD(f.ageType, f.ageValue, f.ageUnit),
+    ageLabel: formatAgeLabel(f.ageType, f.ageValue, f.ageUnit),
+    volumes: f.volumes,
+  })
+  f.addedToCurve = true
+  showToast('Added to Growth Curve')
+}
+
 function onVolumes(data: { label: number; volume: number }[]) {
-  if (selected.value) {
-    selected.value.volumes = data
-    if (hasSubject(selected.value.id)) updateVolumes(selected.value.id, data)
+  if (!selected.value) return
+  selected.value.volumes = data
+  if (hasSubject(selected.value.id)) updateVolumes(selected.value.id, data)
+  // Complete a pending "Add to Curve" that was waiting for volumes
+  if (pendingCurveId.value === selected.value.id) {
+    pendingCurveId.value = null
+    addSubjectFromFile(selected.value)
   }
 }
 
 function toggleCurve(f: BatchFile) {
   if (!f.addedToCurve) {
-    // Auto-select file if not already viewing it — triggers MriViewer → onVolumes → updateVolumes
-    if (selected.value?.id !== f.id) selected.value = f
-    addSubject({
-      id: f.id,
-      name: f.file.name,
-      sex: f.sex === 'Unknown' ? 'Unknown' : f.sex as 'Male' | 'Female',
-      postConceptionDays: computePCD(f.ageType, f.ageValue, f.ageUnit),
-      ageLabel: formatAgeLabel(f.ageType, f.ageValue, f.ageUnit),
-      volumes: f.volumes,
-    })
-    f.addedToCurve = true
-    showToast('Added to Growth Curve')
+    if (f.volumes.length === 0) {
+      // Volumes not loaded yet — select file to trigger MriViewer, then add once onVolumes fires
+      selected.value = f
+      pendingCurveId.value = f.id
+      showToast('Loading volumes…')
+    } else {
+      addSubjectFromFile(f)
+    }
   } else {
     removeSubject(f.id)
     f.addedToCurve = false
+    pendingCurveId.value = null
     showToast('Removed from Growth Curve')
   }
 }
