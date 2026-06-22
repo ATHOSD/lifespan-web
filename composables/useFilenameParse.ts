@@ -7,14 +7,10 @@ export interface ParsedMeta {
 }
 
 const MODALITY_PATTERNS: [string, RegExp][] = [
-  ['T1w',   /^T1w$/i],
-  ['T2w',   /^T2w$/i],
-  ['FLAIR', /^FLAIR$/i],
-  ['DWI',   /^DWI$/i],
-  ['FA',    /^FA$/i],
-  ['MD',    /^MD$/i],
-  ['T1',    /^T1$/i],
-  ['T2',    /^T2$/i],
+  ['T1w', /^T1w$/i],
+  ['T2w', /^T2w$/i],
+  ['FA',  /^FA$/i],
+  ['MD',  /^MD$/i],
 ]
 
 export function parseFilename(filename: string): ParsedMeta {
@@ -34,16 +30,16 @@ export function parseFilename(filename: string): ParsedMeta {
   // Age: single-token patterns
   for (const tok of tokens) {
     let m: RegExpMatchArray | null
-    // GA: must have explicit "GA" marker — 28wGA, 28GA
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:wGA|GA)$/i))) {
+    // GA: explicit marker — 28wGA, 28wksGA, 28weeksGA, 28GA
+    if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?GA|GA)$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
-    // GA: GA28, GA28w, GA28wk
-    if ((m = tok.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
+    // GA: GA28, GA28w, GA28wk, GA28wks, GA28weeks
+    if ((m = tok.match(/^GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
-    // Postnatal weeks: 28w, 28wk (no GA marker)
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)w(?:k)?$/i))) {
+    // Postnatal weeks: 28w, 28wk, 28wks, 28week, 28weeks (no GA marker)
+    if ((m = tok.match(/^(\d+(?:\.\d+)?)w(?:ks?|eeks?)?$/i))) {
       result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
     // Postnatal years: 5y, 5yr, 5.5years
@@ -62,9 +58,9 @@ export function parseFilename(filename: string): ParsedMeta {
       if (!/^age$/i.test(tokens[i])) continue
       const next = tokens[i + 1]
       let m: RegExpMatchArray | null
-      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:wGA|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
+      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?GA|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:ks?|eeks?)?)?$/i))) {
         result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
-      } else if ((m = next.match(/^(\d+(?:\.\d+)?)w(?:k)?$/i))) {
+      } else if ((m = next.match(/^(\d+(?:\.\d+)?)w(?:ks?|eeks?)?$/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
       } else if ((m = next.match(/^(\d+(?:\.\d+)?)y(?:r|rs?)?$/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'
