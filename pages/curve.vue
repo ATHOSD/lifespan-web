@@ -156,18 +156,36 @@ function getVolume(s: CurveSubject, measure: string): number | null {
 
 let Plotly: any = null
 
+function pcdToAgeLabel(pcd: number): string {
+  if (pcd < 280) {
+    return `${(pcd / 7).toFixed(0)}w GA`
+  }
+  const postnatal = pcd - 280
+  if (postnatal < 365) {
+    return `${(postnatal / 30.44).toFixed(1)} mo`
+  }
+  return `${(postnatal / 365.25).toFixed(1)} y`
+}
+
 function buildBandTraces(sexKey: string, r: number, g: number, b: number) {
   const d = volRef.value?.[selectedMeasure.value]?.[sexKey]
   if (!d) return []
   const fill1 = `rgba(${r},${g},${b},0.08)`
   const fill2 = `rgba(${r},${g},${b},0.15)`
   const line  = `rgba(${r},${g},${b},0.65)`
+  const ageLabels: string[] = d.pcd.map(pcdToAgeLabel)
   return [
     { x: d.pcd, y: d.c005, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip' },
     { x: d.pcd, y: d.c995, mode: 'lines', fill: 'tonexty', fillcolor: fill1, line: { color: 'transparent' }, name: `${sexKey} 0.5–99.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
     { x: d.pcd, y: d.c025, mode: 'lines', line: { color: 'transparent' }, showlegend: false, hoverinfo: 'skip', legendgroup: sexKey },
     { x: d.pcd, y: d.c975, mode: 'lines', fill: 'tonexty', fillcolor: fill2, line: { color: 'transparent' }, name: `${sexKey} 2.5–97.5th`, legendgroup: sexKey, hoverinfo: 'skip' },
-    { x: d.pcd, y: d.c500, mode: 'lines', line: { color: line, width: 1.5 }, name: `${sexKey} 50th`, legendgroup: sexKey },
+    {
+      x: d.pcd, y: d.c500, mode: 'lines',
+      line: { color: line, width: 1.5 },
+      name: `${sexKey} 50th`, legendgroup: sexKey,
+      customdata: ageLabels,
+      hovertemplate: 'Age: %{customdata}<br>Volume: %{y:.0f} mm³<extra>%{fullData.name}</extra>',
+    },
   ]
 }
 
