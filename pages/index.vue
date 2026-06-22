@@ -172,6 +172,7 @@
 <script setup lang="ts">
 import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
 import { useToast } from '~/composables/useToast'
+import { parseFilename } from '~/composables/useFilenameParse'
 
 const COLORS = [
   '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
@@ -239,6 +240,13 @@ function setFile(f: File) {
     curveSubjectId.value = null
   }
   addedToCurve.value = false
+
+  const parsed = parseFilename(f.name)
+  if (parsed.modality) modality.value = parsed.modality
+  if (parsed.sex)      sex.value = parsed.sex
+  if (parsed.ageType)  ageType.value = parsed.ageType
+  if (parsed.ageValue !== undefined) ageValue.value = parsed.ageValue
+  if (parsed.ageUnit)  ageUnit.value = parsed.ageUnit
 }
 
 function onFileChange(e: Event) {

@@ -202,6 +202,7 @@
 import { ref, computed } from 'vue'
 import { computePCD, formatAgeLabel, useCurveStore } from '~/composables/useCurveStore'
 import { useToast } from '~/composables/useToast'
+import { parseFilename } from '~/composables/useFilenameParse'
 
 const COLORS = [
   '#CD3E4E','#781286','#C43AFA','#E69422','#00760E',
@@ -264,14 +265,15 @@ function addFiles(newFiles: FileList | File[]) {
   const existing = new Set(files.value.map(f => f.file.name))
   for (const file of Array.from(newFiles)) {
     if (existing.has(file.name)) continue
+    const p = parseFilename(file.name)
     files.value.push({
       id: crypto.randomUUID(),
       file,
-      modality: 'T1w',
-      ageType: 'Postnatal',
-      ageValue: null,
-      ageUnit: 'years',
-      sex: 'Unknown' as const,
+      modality: p.modality ?? 'T1w',
+      ageType: p.ageType ?? 'Postnatal',
+      ageValue: p.ageValue ?? null,
+      ageUnit: p.ageUnit ?? 'years',
+      sex: p.sex === 'M' ? 'Male' : p.sex === 'F' ? 'Female' : 'Unknown',
       addedToCurve: false,
       status: 'queued',
       mriUrl: URL.createObjectURL(file),
