@@ -34,19 +34,23 @@ export function parseFilename(filename: string): ParsedMeta {
   // Age: single-token patterns
   for (const tok of tokens) {
     let m: RegExpMatchArray | null
-    // GA: 28w, 28wGA, 28wk, 28GA
-    if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:w(?:GA|wk)?|GA)$/i))) {
+    // GA: must have explicit "GA" marker — 28wGA, 28GA
+    if ((m = tok.match(/^(\d+(?:\.\d+)?)(?:wGA|GA)$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
-    // GA: GA28, GA28wk, GA28w
+    // GA: GA28, GA28w, GA28wk
     if ((m = tok.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
       result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
+    }
+    // Postnatal weeks: 28w, 28wk (no GA marker)
+    if ((m = tok.match(/^(\d+(?:\.\d+)?)w(?:k)?$/i))) {
+      result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'; break
     }
     // Postnatal years: 5y, 5yr, 5.5years
     if ((m = tok.match(/^(\d+(?:\.\d+)?)y(?:r|rs|ears?)?$/i))) {
       result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'; break
     }
-    // Postnatal months: 6mo, 6mon, 6months — require at least "mo" to avoid "m" alone
+    // Postnatal months: 6mo, 6mon, 6months
     if ((m = tok.match(/^(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?$/i))) {
       result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'months'; break
     }
@@ -58,8 +62,10 @@ export function parseFilename(filename: string): ParsedMeta {
       if (!/^age$/i.test(tokens[i])) continue
       const next = tokens[i + 1]
       let m: RegExpMatchArray | null
-      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:w(?:GA|wk)?|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
+      if ((m = next.match(/^(\d+(?:\.\d+)?)(?:wGA|GA)$/i)) || (m = next.match(/^GA(\d+(?:\.\d+)?)(?:w(?:k)?)?$/i))) {
         result.ageType = 'GA'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
+      } else if ((m = next.match(/^(\d+(?:\.\d+)?)w(?:k)?$/i))) {
+        result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'weeks'
       } else if ((m = next.match(/^(\d+(?:\.\d+)?)y(?:r|rs?)?$/i))) {
         result.ageType = 'Postnatal'; result.ageValue = parseFloat(m[1]); result.ageUnit = 'years'
       } else if ((m = next.match(/^(\d+(?:\.\d+)?)mo(?:n(?:th)?s?)?$/i))) {
