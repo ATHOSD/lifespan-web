@@ -308,6 +308,8 @@ function onVolumes(data: { label: number; volume: number }[]) {
 
 function toggleCurve(f: BatchFile) {
   if (!f.addedToCurve) {
+    // Auto-select file if not already viewing it — triggers MriViewer → onVolumes → updateVolumes
+    if (selected.value?.id !== f.id) selected.value = f
     addSubject({
       id: f.id,
       name: f.file.name,
