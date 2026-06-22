@@ -40,10 +40,9 @@ function initials(name: string) {
 .page-desc { font-size: 1rem; color: #a8a29e; margin-top: 5px; }
 
 .contacts-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-width: 560px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 .contact-card {
