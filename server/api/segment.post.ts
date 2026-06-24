@@ -30,13 +30,12 @@ export default defineEventHandler(async (event) => {
   const base64 = scanField.data.toString('base64')
   const dataUri = `data:application/octet-stream;base64,${base64}`
 
-  // Create prediction
+  // Create prediction and return ID immediately — client polls /api/segment/:id
   const predRes = await fetch('https://api.replicate.com/v1/predictions', {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${config.replicateApiToken}`,
       'Content-Type': 'application/json',
-      'Prefer': 'wait=60',
     },
     body: JSON.stringify({
       version: config.replicateVersion,
@@ -46,23 +45,9 @@ export default defineEventHandler(async (event) => {
 
   if (!predRes.ok) {
     const err = await predRes.text()
-    throw createError({ statusCode: 500, message: `Prediction failed: ${err}` })
+    throw createError({ statusCode: 500, message: `Prediction create failed: ${err}` })
   }
 
-  let result = await predRes.json()
-
-  // Poll until done
-  while (result.status !== 'succeeded' && result.status !== 'failed' && result.status !== 'canceled') {
-    await new Promise(r => setTimeout(r, 3000))
-    const poll = await fetch(`https://api.replicate.com/v1/predictions/${result.id}`, {
-      headers: { Authorization: `Bearer ${config.replicateApiToken}` },
-    })
-    result = await poll.json()
-  }
-
-  if (result.status !== 'succeeded') {
-    throw createError({ statusCode: 500, message: result.error || 'Prediction failed' })
-  }
-
-  return { segUrl: result.output }
+  const result = await predRes.json()
+  return { id: result.id, status: result.status }
 })

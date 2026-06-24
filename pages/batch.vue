@@ -369,8 +369,15 @@ async function runAll() {
       const form = new FormData()
       form.append('scan', f.file)
       form.append('modality', f.modality)
-      const res = await $fetch<{ segUrl: string }>('/api/segment', { method: 'POST', body: form })
-      f.segUrl = `/api/download?url=${encodeURIComponent(res.segUrl)}`
+      const { id } = await $fetch<{ id: string }>('/api/segment', { method: 'POST', body: form })
+      while (true) {
+        await new Promise(r => setTimeout(r, 3000))
+        const poll = await $fetch<{ status: string; segUrl?: string }>(`/api/segment/${id}`)
+        if (poll.status === 'succeeded' && poll.segUrl) {
+          f.segUrl = `/api/download?url=${encodeURIComponent(poll.segUrl)}`
+          break
+        }
+      }
       f.status = 'done'
       if (!selected.value) selected.value = f
     } catch (e: any) {

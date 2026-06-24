@@ -303,12 +303,18 @@ async function runSegmentation() {
     form.append('scan', file.value)
     form.append('modality', modality.value)
 
-    const res = await $fetch<{ segUrl: string }>('/api/segment', {
-      method: 'POST',
-      body: form,
-    })
+    // Create prediction and get ID immediately
+    const { id } = await $fetch<{ id: string }>('/api/segment', { method: 'POST', body: form })
 
-    segUrl.value = `/api/download?url=${encodeURIComponent(res.segUrl)}`
+    // Poll until done — no Railway timeout risk since each poll is a short GET
+    while (true) {
+      await new Promise(r => setTimeout(r, 3000))
+      const poll = await $fetch<{ status: string; segUrl?: string }>(`/api/segment/${id}`)
+      if (poll.status === 'succeeded' && poll.segUrl) {
+        segUrl.value = `/api/download?url=${encodeURIComponent(poll.segUrl)}`
+        break
+      }
+    }
   } catch (e: any) {
     error.value = e?.data?.message || e.message || 'Unknown error'
   } finally {
