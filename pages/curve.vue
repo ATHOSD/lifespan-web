@@ -138,25 +138,27 @@ function subjectStatus(s: CurveSubject): 'visible' | 'wrong-sex' | 'no-data' {
 
 function getVolume(s: CurveSubject, measure: string): number | null {
   const lbl = (n: number) => s.volumes.find(v => v.label === n)?.volume ?? null
+  // Bilateral structures: segmentation gives L+R sum, brainchart reference uses per-hemisphere → divide by 2
+  const half = (n: number) => { const v = lbl(n); return v !== null ? v / 2 : null }
   switch (measure) {
     case 'GMV':        return lbl(2)
     case 'WMV':        return lbl(3)
     case 'Ventricles': return lbl(1)
     case 'BS':         return lbl(13)
-    case 'Hippocampus': return lbl(4)
-    case 'Amygdala':   return lbl(5)
-    case 'Caudate':    return lbl(6)
-    case 'Putamen':    return lbl(7)
-    case 'Pallidum':   return lbl(8)
-    case 'Thalamus':   return lbl(9)
-    case 'Accumbens':  return lbl(10)
-    case 'Ventral-DC': return lbl(14)
+    case 'Hippocampus': return half(4)
+    case 'Amygdala':   return half(5)
+    case 'Caudate':    return half(6)
+    case 'Putamen':    return half(7)
+    case 'Pallidum':   return half(8)
+    case 'Thalamus':   return half(9)
+    case 'Accumbens':  return half(10)
+    case 'Ventral-DC': return half(14)
     case 'CBM': {
       const cx = lbl(11), wm = lbl(12)
       return cx !== null && wm !== null ? cx + wm : null
     }
     case 'Subcortical': {
-      const parts = [4, 5, 6, 7, 8, 9, 10, 14].map(lbl)
+      const parts = [4, 5, 6, 7, 8, 9, 10, 14].map(half)
       return parts.every(v => v !== null) ? parts.reduce((a, b) => a! + b!, 0)! : null
     }
     default: return null
