@@ -158,7 +158,8 @@ function getVolume(s: CurveSubject, measure: string): number | null {
       return cx !== null && wm !== null ? cx + wm : null
     }
     case 'Subcortical': {
-      const parts = [4, 5, 6, 7, 8, 9, 10, 14].map(half)
+      // brainchart Subcortical = L+R sum of 7 structures (Ventral-DC excluded)
+      const parts = [4, 5, 6, 7, 8, 9, 10].map(lbl)
       return parts.every(v => v !== null) ? parts.reduce((a, b) => a! + b!, 0)! : null
     }
     default: return null
