@@ -49,6 +49,11 @@
           <div class="subj-info">
             <div class="subj-name">{{ s.name }}</div>
             <div class="subj-meta">{{ s.ageLabel }} · {{ s.sex }}</div>
+            <div v-if="subjectStatus(s) === 'visible'" class="subj-scores">
+              <span class="score-centile">{{ formatCentile(computeCentile(s, selectedMeasure)) }}</span>
+              <span class="score-ndi" title="Global NDI">G {{ formatNDI(computeNDI(s, GLOBAL_MEASURES)) }}</span>
+              <span class="score-ndi" title="Subcortical NDI">S {{ formatNDI(computeNDI(s, SUBCORTICAL_MEASURES)) }}</span>
+            </div>
             <div v-if="subjectStatus(s) === 'wrong-sex'" class="subj-hidden-reason">not on {{ selectedSex }} chart</div>
           </div>
           <button class="subj-remove" @click="removeSubject(s.id)" title="Remove">
@@ -111,6 +116,92 @@ const MEASURE_LABELS: Record<string, string> = {
 // 11=CBM_Cortex, 12=CBM_WM, 13=Brainstem, 14=Ventral_DC
 
 const MAX_PCD = 280 + 85 * 365.25  // 85 years postnatal
+
+// Centile interpolation grid (23 quantile levels)
+const P_GRID = [0.005,0.025,0.05,0.10,0.15,0.20,0.25,0.30,0.35,0.40,0.45,0.50,0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,0.975,0.995]
+const C_KEYS = ['c005','c025','c050','c100','c150','c200','c250','c300','c350','c400','c450','c500','c550','c600','c650','c700','c750','c800','c850','c900','c950','c975','c995']
+const GLOBAL_MEASURES    = ['GMV','WMV','Ventricles','CBM','BS','Subcortical']
+const SUBCORTICAL_MEASURES = ['Hippocampus','Amygdala','Caudate','Putamen','Pallidum','Accumbens','Thalamus']
+
+// Inverse normal CDF — Peter Acklam's rational approximation (~9-digit accuracy)
+function qnorm(p: number): number {
+  if (p <= 0) return -Infinity
+  if (p >= 1) return  Infinity
+  const a = [-3.969683028665376e+01,2.209460984245205e+02,-2.759285104469687e+02,1.383577518672690e+02,-3.066479806614716e+01,2.506628277459239e+00]
+  const b = [-5.447609879822406e+01,1.615858368580409e+02,-1.556989798598866e+02,6.680131188771972e+01,-1.328068155288572e+01]
+  const c = [-7.784894002430293e-03,-3.223964580411365e-01,-2.400758277161838e+00,-2.549732539343734e+00,4.374664141464968e+00,2.938163982698783e+00]
+  const d = [7.784695709041462e-03,3.224671290700398e-01,2.445134137142996e+00,3.754408661907416e+00]
+  const pLow = 0.02425
+  if (p < pLow) {
+    const q = Math.sqrt(-2*Math.log(p))
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)
+  }
+  if (p <= 1-pLow) {
+    const q = p-0.5, r = q*q
+    return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q/(((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1)
+  }
+  const q = Math.sqrt(-2*Math.log(1-p))
+  return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5])/((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1)
+}
+
+function estimateCentile(logAge: number, sexRef: any, volume: number): number | null {
+  const logAges: number[] = sexRef.logAge
+  if (!logAges?.length) return null
+  // Find interpolation bracket
+  let lo = 0, hi = logAges.length - 1
+  while (lo < hi - 1) { const mid = (lo+hi)>>1; if (logAges[mid] <= logAge) lo=mid; else hi=mid }
+  const t = logAges[hi]===logAges[lo] ? 0 : (logAge-logAges[lo])/(logAges[hi]-logAges[lo])
+  // Build quantile vector at this age
+  const qVec: number[] = [], pGrid: number[] = []
+  for (let i = 0; i < C_KEYS.length; i++) {
+    const arr: number[] = sexRef[C_KEYS[i]]
+    if (!arr) continue
+    const q = arr[lo] + t*(arr[hi]-arr[lo])
+    if (isFinite(q)) { qVec.push(q); pGrid.push(P_GRID[i]) }
+  }
+  if (qVec.length < 2) return null
+  if (volume <= qVec[0]) return pGrid[0]
+  if (volume >= qVec[qVec.length-1]) return pGrid[pGrid.length-1]
+  for (let j = 0; j < qVec.length-1; j++) {
+    if (volume >= qVec[j] && volume < qVec[j+1]) {
+      return pGrid[j] + (pGrid[j+1]-pGrid[j])*(volume-qVec[j])/(qVec[j+1]-qVec[j])
+    }
+  }
+  return null
+}
+
+function computeCentile(s: CurveSubject, measure: string): number | null {
+  if (!volRef.value || s.postConceptionDays === null) return null
+  const sexKey = s.sex === 'Female' ? 'Female' : 'Male'
+  const ref = volRef.value[measure]?.[sexKey]
+  if (!ref?.logAge) return null
+  const vol = getVolume(s, measure)
+  if (vol === null) return null
+  return estimateCentile(Math.log(s.postConceptionDays), ref, vol)
+}
+
+function computeNDI(s: CurveSubject, measures: string[]): number | null {
+  if (s.sex === 'Unknown' || s.postConceptionDays === null) return null
+  const zScores: number[] = []
+  for (const m of measures) {
+    const c = computeCentile(s, m)
+    if (c === null) continue
+    const z = qnorm(Math.max(1e-6, Math.min(1-1e-6, c)))
+    if (isFinite(z)) zScores.push(z)
+  }
+  if (zScores.length < 2) return null
+  return Math.sqrt(zScores.reduce((a, z) => a+z*z, 0) / zScores.length)
+}
+
+function formatCentile(c: number | null): string {
+  if (c === null) return '—'
+  const pct = Math.round(c * 100)
+  return `P${pct}`
+}
+
+function formatNDI(n: number | null): string {
+  return n === null ? '—' : n.toFixed(2)
+}
 
 const AGE_TICKS = {
   vals:  [147, 196, 245, 280, 395, 645, 1825, 3650, 7300, 14600, 25550, Math.round(MAX_PCD)],
@@ -378,7 +469,15 @@ watch([selectedMeasure, selectedSex, subjects], () => {
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 .subj-meta { font-size: 0.72rem; color: #a8a29e; margin-top: 1px; }
-.subj-hidden-reason { font-size: 0.68rem; color: #c4bfb8; margin-top: 1px; font-style: italic; }
+.subj-hidden-reason { font-size: 0.68rem; color: #c4bfb8; margin-top: 2px; font-style: italic; }
+
+.subj-scores { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.score-centile, .score-ndi {
+  font-size: 0.68rem; font-weight: 600; padding: 1px 5px;
+  border-radius: 4px; white-space: nowrap;
+}
+.score-centile { background: #ede9fe; color: #7c3aed; }
+.score-ndi { background: #f0ede8; color: #78716c; }
 .item-hidden { opacity: 0.55; }
 
 .subj-remove {
