@@ -28,6 +28,12 @@
           <span class="subject-count">{{ subjects.length }}</span>
         </div>
 
+        <div v-if="subjects.length > 0" class="score-legend">
+          <span class="score-centile">P</span> percentile (selected measure) &nbsp;
+          <span class="score-ndi">G</span> Global NDI &nbsp;
+          <span class="score-ndi">S</span> Subcortical NDI
+        </div>
+
         <div v-if="subjects.length === 0" class="list-empty">
           <div class="list-empty-icon">
             <svg viewBox="0 0 40 40" fill="none" width="36" height="36">
@@ -196,7 +202,7 @@ function computeNDI(s: CurveSubject, measures: string[]): number | null {
 function formatCentile(c: number | null): string {
   if (c === null) return '—'
   const pct = Math.round(c * 100)
-  return `P${pct}`
+  return `P ${pct}`
 }
 
 function formatNDI(n: number | null): string {
@@ -471,6 +477,10 @@ watch([selectedMeasure, selectedSex, subjects], () => {
 .subj-meta { font-size: 0.72rem; color: #a8a29e; margin-top: 1px; }
 .subj-hidden-reason { font-size: 0.68rem; color: #c4bfb8; margin-top: 2px; font-style: italic; }
 
+.score-legend {
+  padding: 7px 14px; font-size: 0.68rem; color: #a8a29e;
+  border-bottom: 1px solid #f0ede8; line-height: 1.8; flex-shrink: 0;
+}
 .subj-scores { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
 .score-centile, .score-ndi {
   font-size: 0.68rem; font-weight: 600; padding: 1px 5px;
